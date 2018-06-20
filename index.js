@@ -1,6 +1,9 @@
 const Discord = require("discord.js")
     , config = require("./config")
-    , client = new Discord.Client();
+    , client = new Discord.Client()
+    , db = require("./src/db/getUserInfo")
+
+db.initDB();
 
 client.on("ready", () => {
   console.log("I am ready!");
@@ -16,7 +19,6 @@ client.on("message", (message) => {
 
   if (msg.startsWith("ping")) {
     pingpong(message);
-    
   } else
   if (msg.startsWith("foo")) {
     foobar(message);
