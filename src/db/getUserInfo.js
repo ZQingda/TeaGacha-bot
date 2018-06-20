@@ -11,6 +11,7 @@ var create = 'CREATE TABLE IF NOT EXISTS test (id INTEGER);'
 
 var userCreate = 'CREATE TABLE IF NOT EXISTS users (';
    userCreate += 'user_id INTEGER PRIMARY KEY NOT NULL,';
+   userCreate += 'username TEXT UNIQUE,';
    userCreate += 'flower INTEGER,';
    userCreate += 'clovers INTEGER,';
    userCreate += 'energy INTEGER';
@@ -32,10 +33,15 @@ var unitCreate = 'CREATE TABLE IF NOT EXISTS units (';
    unitCreate += 'FOREIGN KEY (owner_id) REFERENCES users (user_id)';
    unitCreate += ');';
 
+var userInsert = 'INSERT INTO users (user_id, flower, clovers, energy) VALUES (78615507703439360, 10000, 100, 100);'
+var unitInsert = 'INSERT INTO units (owner_id, original_owner, atk, def, spd, exp, exp_remaining, lvl, rarity, armor_class, combat_type) VALUES (78615507703439360, "Billy", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
+
 module.exports.initDB = function () {
   //db.run(create);
   console.log(unitCreate);
   db.run(userCreate);
+  db.run(unitInsert);
   db.run(unitCreate);
+  db.run(userInsert);
   db.close();
 }
