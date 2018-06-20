@@ -1,9 +1,13 @@
 const Discord = require("discord.js")
     , config = require("./config")
     , client = new Discord.Client()
-    , db = require("./src/db/getUserInfo")
+    , db = require("./src/db/connect")
+    , gachaRouter = require("./src/gachaRoutes");
 
-db.initDB();
+var gachaDB = db.newDB('./database/gachiGacha.db');
+db.initDB(gachaDB);
+db.insertUser(gachaDB);
+db.closeDB(gachaDB);
 
 client.on("ready", () => {
   console.log("I am ready!");
@@ -25,6 +29,9 @@ client.on("message", (message) => {
   } else
   if (msg.startsWith("prefix")) {
     prefixMod(message);
+  } else
+  if (msg.startsWith("gacha ")) {
+    gachaRouter(message);
   }
   else {
     message.channel.send("Invalid commando yo");
@@ -38,7 +45,8 @@ function pingpong(message) {
 
 function foobar(message) {
   var ret = message.content.slice(3);
-  message.channel.send("bar!");
+  var userID = message.author.id;
+  message.channel.send("bar! " + userID);
 }
 
 function prefixMod(message) {
