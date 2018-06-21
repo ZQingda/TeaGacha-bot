@@ -8,7 +8,7 @@ module.exports.dbAddChar = function(connection, c) {
     console.log('Connected for char insertion.');
   });
 
-  var charInsert = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, exp, exp_remaining, lvl, rarity, armor_class, combat_type) VALUES('
+  var charInsert = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, lvl, rarity, armor_class, combat_type, class, specialization) VALUES('
   charInsert += '"' + c.unit_name + '", ';
   charInsert += c.owner_id + ', ';
   charInsert += '"' + c.original_owner + '", ';
@@ -16,18 +16,14 @@ module.exports.dbAddChar = function(connection, c) {
   charInsert += c.def + ', ';
   charInsert += c.spd + ', ';
   charInsert += c.hp + ', ';
-  charInsert += c.exp + ', ';
-  charInsert += c.exp_remaining + ', ';
   charInsert += c.lvl + ', ';
   charInsert += c.rarity + ', ';
   charInsert += '"' + c.armor_class + '", ';
-  charInsert += '"' + c.combat_type + '")';
+  charInsert += '"' + c.combat_type + '", ';
+  charInsert += '"' + c.class + '", ';
+  charInsert += '"' + c.specialization + '")';
   console.log(charInsert);
   db.run(charInsert);
 
   db.close();
 }
-
-
-
-
