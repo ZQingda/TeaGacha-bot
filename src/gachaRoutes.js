@@ -1,38 +1,74 @@
-var dbAddChar = require("./db/addChars").dbAddChar;
-var char = require("./unit/template").char;
+var dbAddChar = require("./db/units").dbAddChar;
+var cur = require("./currency/currency");
+var units = require("./unit/units");
+var embeds = require("./messages/message");
+var colours = require("./config").colours;
 
-module.exports = function(message) {
-  msg = message.content.slice(7);
+module.exports = function (message) {
+  msg = message.content.split(' ');
   //console.log(msg);
-  switch (msg) {
+  switch (msg[1]) {
     case "rollOne":
       rollOne(message);
       break;
-    case "myChars":
+    case "getChars":
       getChars(message);
       break;
+    case "modClovers":
+      modCurrencyWrap(message, 'clovers');
+      break;
+    case "modFlowers":
+      modCurrencyWrap(message, 'flower');
+      break;
+    case "getClovers":
+      cur.getCurrency(message, 'clovers');
+      break;
+    case "getFlowers":
+      cur.getCurrency(message, 'flower');
+      break;
+    case "buyClovers":
+      buyCurrency(message, 'flower', 'clovers', 100);
+      break;
     default:
-      message.channel.send("That's not a gacha command");
+      console.log(msg);
+      embeds.printSingle(message, colours.error, "That's not a gacha command!");
   }
 }
 
-function rollOne(message) {
-  console.log("RollOne");
-  const c = new char([], message.author.id);
-  console.log(c);
-  dbAddChar('./database/gachiGacha.db', c);
+function modCurrencyWrap(message, currency) {
+  cur.modCurrency(message, currency)
+    .catch((err) => {
+      console.error('routes error : ' + err.msg);
+    });
+}
 
-  var r = '[==========] CONGRATULATIONS [==========]\n\n';
-  r += 'You got a: ' + c.unit_name + '\n';
-  r += 'Rarity: ' + c.rarity  + '\n'
-  r += 'Armor: ' + c.armor_class + '\n'
-  r += 'Combat: ' + c.combat_type + '\n'
-  r += 'Attack: ' + c.atk + '\n'
-  r += 'Defence: ' + c.def + '\n'
-  r += 'Speed: ' + c.spd + '\n'
-  r += 'Health: ' + c.hp + '\n\n'
-  r +=    '[=======================================]';
-  message.channel.send(r);
+function buyCurrency(message, from, to, rate) {
+  var amountTo = parseInt(message.content.split(' ')[2]);
+  var amountFrom = amountTo * rate;
+  cur.modCurrency(message, from, (amountFrom * -1))
+    .then((params) => {
+      cur.modCurrency(message, to, amountTo)
+        .catch((err) => {
+          console.error('To conversion error : ' + err);
+        })
+    })
+    .catch((err) => {
+      console.error('From conversion error : ' + err);
+    })
+}
+
+function rollOne(message) {
+  cur.modCurrency(message, 'clovers', -10)
+    .then((params) => {
+      return new Promise((resolve) => {
+        var char = units.genOne(message);
+        resolve({char : char});
+      })
+    })
+    .then(dbAddChar)
+    .catch((err) => {
+      console.error('rollOne routes error : ' + err);
+    })
 }
 
 function getChars(message) {

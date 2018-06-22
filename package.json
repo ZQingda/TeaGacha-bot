@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.1",
+    "bluebird": "^3.5.1",
     "discord.js": "^11.3.2",
+    "pad-left": "^2.1.0",
     "sqlite3": "^4.0.0"
   }
 }
