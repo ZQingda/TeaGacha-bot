@@ -1,5 +1,9 @@
+const Discord = require("discord.js");
 var dbAddChar = require("./db/addChars").dbAddChar;
+var dbGetOwnedUnits = require("./db/getUnits").dbGetOwnedUnits;
 var char = require("./unit/template").char;
+var inv = require("./unit/unitinventory");
+
 
 module.exports = function(message) {
   msg = message.content.slice(7);
@@ -24,7 +28,7 @@ function rollOne(message) {
 
   var r = '[==========] CONGRATULATIONS [==========]\n\n';
   r += 'You got a: ' + c.unit_name + '\n';
-  r += 'Rarity: ' + c.rarity  + '\n'
+  r += 'Rank: ' + c.rank  + '\n'
   r += 'Armor: ' + c.armor_class + '\n'
   r += 'Combat: ' + c.combat_type + '\n'
   r += 'Attack: ' + c.atk + '\n'
@@ -37,4 +41,8 @@ function rollOne(message) {
 
 function getChars(message) {
   console.log("GetChars");
+  inv.listUnits(message.author.id,message.guild.member(message.author).displayName).then(function(msgEmbed) {
+    message.channel.send(msgEmbed);
+  });
+
 }
