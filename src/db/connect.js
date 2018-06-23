@@ -31,12 +31,12 @@ module.exports.initDB = function (db) {
   unitCreate += 'def INTEGER,';
   unitCreate += 'spd INTEGER,';
   unitCreate += 'hp INTEGER,';
-  unitCreate += 'exp INTEGER,';
-  unitCreate += 'exp_remaining INTEGER,';
   unitCreate += 'lvl INTEGER,'
   unitCreate += 'rarity INTEGER,';
-  unitCreate += 'armor_class INTEGER,';
-  unitCreate += 'combat_type INTEGER,';
+  unitCreate += 'armor_class TEXT,';
+  unitCreate += 'combat_type TEXT,';
+  unitCreate += 'class TEXT,';
+  unitCreate += 'specialization TEXT,';
   unitCreate += 'FOREIGN KEY (owner_id) REFERENCES users (user_id)';
   unitCreate += ');';
 
@@ -51,7 +51,7 @@ module.exports.initDB = function (db) {
 
 module.exports.insertUser = function (db) {
   var userInsert = 'INSERT OR IGNORE INTO users (user_id, flower, clovers, energy) VALUES (135473868553846784, 10000, 100, 100);'
-  var unitInsert = 'INSERT OR IGNORE INTO units (unit_id, unit_name, owner_id, original_owner, atk, def, spd, exp, exp_remaining, lvl, rarity, armor_class, combat_type) VALUES (3, "Jeoff", 135473868553846784, "Johnny", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
+  var unitInsert = 'INSERT OR IGNORE INTO units (unit_id, unit_name, owner_id, original_owner, atk, def, spd, lvl, rarity, armor_class, combat_type, class, specialization) VALUES (3, "Jeoff", 135473868553846784, "Johnny", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
   console.log("Inserting...");
   db.run(unitInsert);
   db.run(userInsert);
