@@ -12,7 +12,7 @@ module.exports.dbAddChar = function(params) {
   
     var c = params.char;
     
-    var charInsert = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, lvl, rarity, armor_class, combat_type, class, specialization) VALUES('
+    var charInsert = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, lvl, rank, armor_class, combat_type, class, specialization) VALUES('
     charInsert += '"' + c.unit_name + '", ';
     charInsert += c.owner_id + ', ';
     charInsert += '"' + c.original_owner + '", ';
@@ -21,7 +21,7 @@ module.exports.dbAddChar = function(params) {
     charInsert += c.spd + ', ';
     charInsert += c.hp + ', ';
     charInsert += c.lvl + ', ';
-    charInsert += c.rarity + ', ';
+    charInsert += c.rank + ', ';
     charInsert += '"' + c.armor_class + '", ';
     charInsert += '"' + c.combat_type + '", ';
     charInsert += '"' + c.class + '", ';
@@ -34,5 +34,4 @@ module.exports.dbAddChar = function(params) {
   
     db.close();
   })
- 
 }

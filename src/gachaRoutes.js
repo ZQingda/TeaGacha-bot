@@ -1,32 +1,42 @@
+const Discord = require("discord.js");
 var dbAddChar = require("./db/addChars").dbAddChar;
 var cur = require("./currency/currency");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
 var colours = require("./config").colours;
+var char = require("./unit/template").char;
+var inv = require("./unit/unitinventory");
 
 module.exports = function (message) {
   msg = message.content.split(' ');
   //console.log(msg);
   switch (msg[1]) {
     case "rollOne":
+    case "ro":
       rollOne(message);
       break;
-    case "getChars":
+    case "listchars":
+    case "lc":
       getChars(message);
       break;
-    case "modClovers":
+    case "modclovers":
+    case "mc":
       modCurrencyWrap(message, 'clovers');
       break;
-    case "modFlowers":
+    case "modflowers":
+    case "mf":
       modCurrencyWrap(message, 'flower');
       break;
-    case "getClovers":
+    case "getclovers":
+    case "gc":
       cur.getCurrency(message, 'clovers');
       break;
-    case "getFlowers":
+    case "getflowers":
+    case "gf":
       cur.getCurrency(message, 'flower');
       break;
-    case "buyClovers":
+    case "buyclovers":
+    case "bc":
       buyCurrency(message, 'flower', 'clovers', 100);
       break;
     default:
@@ -38,7 +48,7 @@ module.exports = function (message) {
 function modCurrencyWrap(message, currency) {
   cur.modCurrency(message, currency)
     .catch((err) => {
-      console.error('routes error : ' + err.msg);
+      console.error('routes error : ' + err);
     });
 }
 
@@ -73,4 +83,8 @@ function rollOne(message) {
 
 function getChars(message) {
   console.log("GetChars");
+  inv.listUnits(message.author.id,message.guild.member(message.author).displayName)
+    .then(function(msgEmbed) {
+      message.channel.send(msgEmbed);
+    });
 }

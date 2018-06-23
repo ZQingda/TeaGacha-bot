@@ -22,7 +22,7 @@ module.exports.modCurrency = function (message, currency, cost) {
       return Promise.resolve({ status: "success", curValue: curValue })
     })
     .catch((err) => {
-      console.error(err);
+      console.error('[!] modCurrency() : ' + err);
       return Promise.reject("modCurrency errored");
     })
 }
@@ -34,6 +34,6 @@ module.exports.getCurrency = function (message, currency) {
       embeds.printCurrency(message, colours.normal, currency, curValue);
     })
     .catch((err) => {
-      console.error(err);
+      console.error('[!] getCurrency() : ' + err);
     })
 }

@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 var userInsert = 'INSERT INTO users (user_id, flower, clovers, energy) VALUES (78615507703439360, 10000, 100, 100);'
-var unitInsert = 'INSERT INTO units (owner_id, original_owner, atk, def, spd, exp, exp_remaining, lvl, rarity, armor_class, combat_type) VALUES (78615507703439360, "Billy", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
+var unitInsert = 'INSERT INTO units (owner_id, original_owner, atk, def, spd, exp, exp_remaining, lvl, rank, armor_class, combat_type) VALUES (78615507703439360, "Billy", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
 
 module.exports.newDB = function (connection) {
   var db = new sqlite3.Database(connection, sqlite3.OPEN_READWRITE, (err) => {
@@ -32,7 +32,7 @@ module.exports.initDB = function (db) {
   unitCreate += 'spd INTEGER,';
   unitCreate += 'hp INTEGER,';
   unitCreate += 'lvl INTEGER,'
-  unitCreate += 'rarity INTEGER,';
+  unitCreate += 'rank INTEGER,';
   unitCreate += 'armor_class TEXT,';
   unitCreate += 'combat_type TEXT,';
   unitCreate += 'class TEXT,';
@@ -51,7 +51,7 @@ module.exports.initDB = function (db) {
 
 module.exports.insertUser = function (db) {
   var userInsert = 'INSERT OR IGNORE INTO users (user_id, flower, clovers, energy) VALUES (135473868553846784, 10000, 100, 100);'
-  var unitInsert = 'INSERT OR IGNORE INTO units (unit_id, unit_name, owner_id, original_owner, atk, def, spd, lvl, rarity, armor_class, combat_type, class, specialization) VALUES (3, "Jeoff", 135473868553846784, "Johnny", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
+  var unitInsert = 'INSERT OR IGNORE INTO units (unit_id, unit_name, owner_id, original_owner, atk, def, spd, lvl, rank, armor_class, combat_type, class, specialization) VALUES (3, "Jeoff", 135473868553846784, "Johnny", 3, 40, 6, 20, 60, 45, 4, 2, 1);'
   console.log("Inserting...");
   db.run(unitInsert);
   db.run(userInsert);

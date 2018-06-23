@@ -6,7 +6,7 @@ const Discord = require("discord.js")
 
 var gachaDB = db.newDB('./database/gachiGacha.db');
 db.initDB(gachaDB);
-db.insertUser(gachaDB);
+//db.insertUser(gachaDB);
 db.closeDB(gachaDB);
 
 client.on("ready", () => {
