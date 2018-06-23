@@ -1,4 +1,4 @@
-var dbAddChar = require("./db/units").dbAddChar;
+var dbAddChar = require("./db/addChars").dbAddChar;
 var cur = require("./currency/currency");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
