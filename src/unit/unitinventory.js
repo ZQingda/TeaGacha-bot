@@ -17,7 +17,7 @@ function listUnits(userid,name) {
       if (i % 2 == 1) {
         msgEmbed.addBlankField(true);
       }
-      msgEmbed.addField(i + ". " + curUnit.unit_name + "12345678",  details + "\n---------------------------", true);
+      msgEmbed.addField(i + ". " + curUnit.unit_name + details + "\n---------------------------", true);
     }
     return msgEmbed;
   });
