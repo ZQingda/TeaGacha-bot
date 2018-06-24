@@ -38,6 +38,10 @@ client.on("message", (message) => {
   }
 });
 
+client.on("messageReactionAdd", (reaction, user) => {
+
+})
+
 function pingpong(message) {
   var ret = message.content.slice(5);
   message.channel.send("Pong!\n" + ret + "\n===");

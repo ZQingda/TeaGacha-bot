@@ -2,40 +2,40 @@
 
 function getCombatIcon(type) {
   if (type == "ranged") {
-    return "🏹";
+    return "`🏹`";
   } else if (type == "melee") {
-    return "🔪";
+    return "`🔪`";
   } else {
-    return "✨";
+    return "`✨`";
   }
 }
 
 function getArmorIcon(type) {
   if (type == "light") { // replace with case switch later lol
-    return "🛡️";
+    return "`🛡`";
   } else if (type == "medium") {
-    return "🛡️🛡️";
+    return "`🛡🛡`";
   } else {
-    return "🛡️🛡️🛡️";
+    return "`🛡🛡🛡`";
   }
 }
 
 function getRankIcon(rank) {
   switch(rank) {
     case 1:
-      return "🔸";
+      return ":purple_heart:";
     case 2:
-      return "🔸🔸";
+      return ":blue_heart:";
     case 3:
-      return "🔸🔸🔸";
+      return ":green_heart:";
     case 4:
-      return "🔸🔸🔸🔸";
+      return ":yellow_heart:";
     case 5:
-      return "🔸🔸🔸🔸🔸";
+      return ":heart:";
     case 6:
-      return "⭐";
+      return ":heartpulse:";
     case 7:
-      return "⭐⭐";
+      return "⭐";
   }
 }
 
