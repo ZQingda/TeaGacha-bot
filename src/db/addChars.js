@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const config = require('../config');
+const config = require('../config.json');
 
 module.exports.dbAddChar = function(params) {
   return new Promise((resolve, reject) => {
@@ -9,9 +9,9 @@ module.exports.dbAddChar = function(params) {
       }
       console.log('Connected for char insertion.');
     });
-  
+
     var c = params.char;
-    
+
     var charInsert = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, lvl, rank, armor_class, combat_type, class, specialization) VALUES('
     charInsert += '"' + c.unit_name + '", ';
     charInsert += c.owner_id + ', ';
@@ -31,7 +31,7 @@ module.exports.dbAddChar = function(params) {
       if (err) {reject(err);}
       resolve();
     });
-  
+
     db.close();
   })
 }

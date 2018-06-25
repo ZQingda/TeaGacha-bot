@@ -16,6 +16,10 @@ function genOne(message) {
   return c;
 }
 
+function modUnit(id,field,newval) {
+  
+}
+
 module.exports = {
   genOne: genOne
 }

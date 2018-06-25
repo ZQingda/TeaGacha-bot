@@ -3,9 +3,10 @@ var dbAddChar = require("./db/addChars").dbAddChar;
 var cur = require("./currency/currency");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
-var colours = require("./config").colours;
+const config = require('./config.json');
 var char = require("./unit/template").char;
 var inv = require("./unit/unitinventory");
+var modU = require("./unit/unitexpupgrade");
 
 module.exports = function (message) {
   msg = message.content.split(' ');
@@ -39,9 +40,16 @@ module.exports = function (message) {
     case "bc":
       buyCurrency(message, 'flower', 'clovers', 100);
       break;
+    case "showunit":
+    case "su":
+      getUnit(message);
+      break;
+    case "ae":
+      addXp(message);
+      break;
     default:
       console.log(msg);
-      embeds.printSingle(message, colours.error, "That's not a gacha command!");
+      embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
 }
 
@@ -87,4 +95,27 @@ function getChars(message) {
     .then(function(msgEmbed) {
       message.channel.send(msgEmbed);
     });
+}
+
+function getUnit(message) {
+  console.log("getUnit");
+  var unit_id = message.content.split(" ")[2];
+  inv.showUnit(unit_id)
+  .then(function(msgEmbed) {
+    message.channel.send(msgEmbed);
+  });
+}
+
+function addXp(message) {
+  console.log("Add EXP");
+  var unit_id = message.content.split(" ")[2];
+  var exp = message.content.split(" ")[3];
+  modU.addExp(unit_id,exp)
+  .then(function(success) {
+    if (success) {
+      message.channel.send("EXP added");
+    } else {
+      message.channel.send("EXP Add Failed.");
+    }
+  });
 }
