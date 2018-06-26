@@ -6,7 +6,6 @@ const Discord = require("discord.js")
 
 var gachaDB = db.newDB('./database/gachiGacha.db');
 db.initDB(gachaDB);
-//db.insertUser(gachaDB);
 db.closeDB(gachaDB);
 
 client.on("ready", () => {
@@ -36,6 +35,11 @@ client.on("message", (message) => {
   else {
     message.channel.send("Invalid commando yo");
   }
+});
+
+client.on("messageReactionAdd", (reaction, user) => {
+  console.log(reaction.message.content)
+
 });
 
 function pingpong(message) {
