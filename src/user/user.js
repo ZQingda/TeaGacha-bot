@@ -1,12 +1,27 @@
 var dbUser = require('../db/user');
+var units = require("../unit/units");
+var embeds = require("../messages/message");
+var colours = require('../config').colours;
 
 /**
- * Adds the 
- * @param {number} userId 
+ * Adds the user to the database and gives them 5 initial units.
+ * Prints message of the user stats and the initial units setup.
+ * Returns a promise after all units have been created.
  */
-function setupUser(userId) {
-  const u = new User(userId, {flowers:1000, energy:100});
-  var promise = dbUser.insertUser(u);
+function setupUser(message) {
+  const u = new User(message.author.id, {flowers:1000, energy:100});
+  var promise = dbUser.insertUser(u)
+  .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
+  .then((retUser)=>{
+    var unitPromises =[];
+    for (var i = 0; i < 5; i++) {
+      var curUnit = units[i];
+      unitPromises.push(units.genOne(message.author.id));
+    }
+    return Promise.all(unitPromises);
+  })
+  .then(embeds.printSingle(message, parseInt(colours.normal), 'You have been registered and your initial units have been setup.'));
+
   return promise;
 }
 

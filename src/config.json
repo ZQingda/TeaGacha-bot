@@ -1,0 +1,7 @@
+{
+  "colours" : {
+  "error" : "0xcc263c",
+  "normal" : "0x2eb8b8"
+  },
+  "connection" : "./database/gachiGacha.db"
+}

@@ -3,7 +3,7 @@ const config = require('../config');
 
 function insertUnit(unit) {
   return new Promise(function(resolve, reject) {
-    let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
+    let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READWRITE, (err) => {if (err) {reject(err);}});
     let sqlInsertUnit = 'INSERT INTO units (unit_name, owner_id, original_owner, atk, def, spd, hp, lvl, rank, armor_class, combat_type, class, specialization) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     let parms = [
       unit.unit_name,

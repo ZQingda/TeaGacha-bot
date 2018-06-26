@@ -15,7 +15,7 @@ client.on("ready", () => {
 client.on("message", (message) => {
 
   var msg = message.content
-     ,pf = config.getPrefix();
+     ,pf = config.prefix;
 
   if (!msg.startsWith(pf) || message.author.bot) return;
   msg = msg.slice(1);
@@ -38,9 +38,8 @@ client.on("message", (message) => {
 });
 
 client.on("messageReactionAdd", (reaction, user) => {
-  console.log(reaction.message.content)
 
-});
+})
 
 function pingpong(message) {
   var ret = message.content.slice(5);
@@ -54,9 +53,10 @@ function foobar(message) {
 }
 
 function prefixMod(message) {
-  var prefix = message.content.slice(8);
-  config.setPrefix(prefix);
-  message.channel.send("Prefix is now set to " + config.getPrefix());
+  let newPrefix = message.content.split(" ").slice(1, 2)[0];
+  config.prefix = newPrefix;
+  fs.writeFile("./config.json", JSON.stringify(config), (err) => console.error);
+  message.channel.send("Prefix is now set to " + config.prefix);
 }
 
 client.login(config.token);

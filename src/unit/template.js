@@ -7,6 +7,13 @@ function pickOne(chars) { // CJ's basic fcn for random dude
   return chars[keys[ keys.length * Math.random() << 0]];
 }
 
+// for everything but levelling/exp, the actual level being used
+// is the floor
+function getLvl(char) {
+  console.log("Level: " + char.lvl);
+  return Math.floor(parseFloat(char.lvl));
+}
+
 // need to sum up the chance of the current rarity with the
 // chances of the rarer rarities to get the actual
 // RNG number for rolling this rarity
@@ -218,7 +225,7 @@ const chanceRates = {
   }
 }
 
-module.exports.char = class {
+class char {
   constructor(rateUps = [], ownerId) {
     //Implement rate up chances somehow
     var char = pullOne(chars);
@@ -252,4 +259,13 @@ module.exports.char = class {
     this.hp = getHP(this.unit_name,this.lvl,this.rank,this.specialization);
     this.spd = getSPD(this.unit_name,this.lvl,this.rank,this.specialization);
   }
+}
+
+module.exports = {
+  getLvl : getLvl,
+  getATK : getATK,
+  getDEF : getDEF,
+  getHP : getHP,
+  getSPD : getSPD,
+  char : char
 }
