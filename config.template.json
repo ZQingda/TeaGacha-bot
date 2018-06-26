@@ -1,0 +1,5 @@
+{
+  "token": "",
+  "connection": "./database/gachiGacha.db",
+  "prefix": "!"
+}

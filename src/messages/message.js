@@ -1,5 +1,7 @@
 var pad = require('pad-left');
 var icons = require("../icons/unitIcons");
+var config = require("../config");
+var getLvl = require("../unit/template").getLvl;
 const Discord = require("discord.js");
 
 function unitsEmbed(msgEmbed, units) {
@@ -26,6 +28,34 @@ module.exports.printSingle = function (message, colour, text) {
   message.channel.send(msg);
 }
 
+module.exports.printUser = function(message, colour, unit) {
+  let msg = new Discord.RichEmbed();
+  msg.setColor(colour);
+  msg.setTitle("**__" + message.guild.member(message.author).displayName + "__**");
+  msg.addField('Flowers', unit.flowers, false);
+  msg.addField('Clovers', unit.clovers, false);
+  msg.addField('Energy', unit.energy, false);
+  message.channel.send(msg);
+}
+module.exports.printNewUnit = function(message, colour, unit) {
+  var msg = {
+    embed : {
+      color: colour,
+      title: message.guild.member(message.author).displayName + " just got a new "+ unit.unit_name,
+      description : '[============]\n'
+        + 'Rank: ' + unit.rank + '\n'
+        + 'Armor: ' + unit.armor_class + '\n'
+        + 'Combat: ' + unit.combat_type + '\n'
+        + 'Attack: ' + unit.atk + '\n'
+        + 'Defence: ' + unit.def + '\n'
+        + 'Speed: ' + unit.spd + '\n'
+        + 'Health: ' + unit.hp + '\n\n'
+        + '[============]'
+    }
+  };
+  message.channel.send(msg);
+}
+
 module.exports.printCurrency = function (message, colour, currency, curValue) {
   var msg = {
     embed: {
@@ -42,7 +72,7 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
   console.log(curPage, '     ', maxPage);
   var pageUnits = units.slice((4 * (curPage - 1)), (4 * curPage));
   var msgEmbed = new Discord.RichEmbed();
-  msgEmbed.setColor(0x2eb8b8);
+  msgEmbed.setColor(parseInt(config.colours.normal));
   msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
   msgEmbed = unitsEmbed(msgEmbed, pageUnits);
 
@@ -53,7 +83,7 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
   console.log("curPage initially " + curPage);
 
 
-  if (curPage != maxPage) {
+  if (maxPage != 1) {
     await response.react("◀");
     await response.react("▶");
 
@@ -87,3 +117,4 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
     });
   }
 }
+

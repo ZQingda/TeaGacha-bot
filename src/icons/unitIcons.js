@@ -11,29 +11,29 @@ function getCombatIcon(type) {
 }
 
 function getArmorIcon(type) {
-  if (type == "light") { // replace with case switch later lol
-    return "`🛡`";
+  if (type == "light") {
+    return "🔸";
   } else if (type == "medium") {
-    return "`🛡🛡`";
+    return "🔸🔸";
   } else {
-    return "`🛡🛡🛡`";
+    return "🔸🔸🔸";
   }
 }
 
 function getRankIcon(rank) {
   switch(rank) {
     case 1:
-      return ":purple_heart:";
+      return "💜";
     case 2:
-      return ":blue_heart:";
+      return "💙";
     case 3:
-      return ":green_heart:";
+      return "💚";
     case 4:
-      return ":yellow_heart:";
+      return "💛";
     case 5:
-      return ":heart:";
+      return "❤️";
     case 6:
-      return ":heartpulse:";
+      return "💗";
     case 7:
       return "⭐";
   }
