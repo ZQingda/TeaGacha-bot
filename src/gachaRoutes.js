@@ -87,7 +87,8 @@ function getChars(message) {
   console.log(page);
   if (!page || page < 1) {
     embeds.printSingle(message, colours.error, "Invalid page number!")
-  };
+  } else {
   inv.listUnits(message, page/*message.author.id,message.guild.member(message.author).displayName*/)
     .catch((err) => {console.error(err);})
+  }
 }
