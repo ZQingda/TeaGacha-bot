@@ -7,6 +7,7 @@ function dbGetOwnedUnits(userid) {
   var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
     if (err) {
       console.error(err.message);
+      console.log("BEEP BOOP OH NO");
     }
     console.log('Connected for char retrieval.');
   });
@@ -17,7 +18,8 @@ function dbGetOwnedUnits(userid) {
       if (err) {
         console.log(err);
       }
-      if (rows !== null) {
+      if (rows != null) {
+        console.log("UserID:" + userid);
         console.log("Got " + rows.length + " units.");
         resolve(rows);
       } else {

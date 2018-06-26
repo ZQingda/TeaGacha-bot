@@ -1,41 +1,34 @@
 var chars = require("./catalogue").characters;
-var charLvl = require("./template");
-var dbGetChars = require("../db/getUnits");
-var icons = require("../icons/unitIcons");
-const config = require('../config.json');
-const Discord = require("discord.js");
+var colours = require('../config').colours;
+var dbGetUnitByID = require("../db/getUnits").dbGetUnitByID;
+var dbGetOwnedUnits = require("../db/getUnits").dbGetOwnedUnits;
+var embeds = require("../messages/message");
 
-function listUnits(userid, name) {
-
-  var promise = dbGetChars.dbGetOwnedUnits(userid)
+function listUnits(message, page) {
+  return dbGetOwnedUnits(message.author.id)
     .then(function (units) {
       console.log("Num of units: " + units.length);
-      var msgEmbed = new Discord.RichEmbed();
-      msgEmbed.setColor(Number(config.colours.normal));
-      msgEmbed.setTitle("**__" + name + "'s Units__**");
-      for (var i = 0; i < units.length; i++) {
-        var curUnit = units[i];
-        var details =  "**Lv " + charLvl.getLvl(curUnit) + "** " + curUnit.class
-          + "\n" + icons.getRankIcon(curUnit.rank) + "    " + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
-        if (i % 2 == 1) {
-          msgEmbed.addBlankField(true);
-        }
-        msgEmbed.addField(i + ". " + curUnit.unit_name, details + "\n---------------------------", true);
+      var pages = Math.ceil(units.length / 4);
+      if (page > pages) {
+        embeds.printSingle(message, parseInt(colours.error), "You only have " + pages + " pages of units!");
       }
-      return msgEmbed;
-    });
-  return promise;
+      else {
+        var pageUnits = units.splice((4 * (page - 1)), (4 * page));
+        embeds.printUnitPage(message, parseInt(colours.normal), pageUnits, page, pages);
+      }
+    })
+    .catch((err) => {console.error(err);})
 }
 
 function showUnit(id) {
-  var promise = dbGetChars.dbGetUnitByID(id)
+  var promise = dbGetUnitByID(id)
   .then(function (unit) {
     var msgEmbed = new Discord.RichEmbed();
     if (unit == null) {
-      msgEmbed.setColor(Number(config.colours.error));
+      msgEmbed.setColor(Number(colours.error));
       msgEmbed.setDescription("The unit could not be found.");
     } else {
-      msgEmbed.setColor(Number(config.colours.normal));
+      msgEmbed.setColor(parseInt(colours.normal));
       msgEmbed.setTitle(icons.getRankIcon(unit.rank) + " " + unit.unit_name);
       var expLeft = ((unit.lvl - charLvl.getLvl(unit))*100).toFixed(2);
       msgEmbed.addField("Level","**" + charLvl.getLvl(unit) + "** / EXP: " + expLeft + "%",true);

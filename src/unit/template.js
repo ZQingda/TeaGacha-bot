@@ -225,7 +225,7 @@ const chanceRates = {
   }
 }
 
-module.exports.char = class {
+class char {
   constructor(rateUps = [], ownerId) {
     //Implement rate up chances somehow
     var char = pullOne(chars);
@@ -266,5 +266,6 @@ module.exports = {
   getATK : getATK,
   getDEF : getDEF,
   getHP : getHP,
-  getSPD : getSPD
+  getSPD : getSPD,
+  char : char
 }

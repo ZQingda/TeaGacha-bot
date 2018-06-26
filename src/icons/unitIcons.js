@@ -2,11 +2,11 @@
 
 function getCombatIcon(type) {
   if (type == "ranged") {
-    return "🏹";
+    return "`🏹`";
   } else if (type == "melee") {
-    return "🔪";
+    return "`🔪`";
   } else {
-    return "✨";
+    return "`✨`";
   }
 }
 

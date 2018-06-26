@@ -85,16 +85,19 @@ function rollOne(message) {
     })
     .then(dbAddChar)
     .catch((err) => {
-      console.error('rollOne routes error : ' + err);
+      console.error('rollOne routes error : ' + err.stack);
     })
 }
 
 function getChars(message) {
   console.log("GetChars");
-  inv.listUnits(message.author.id,message.guild.member(message.author).displayName)
-    .then(function(msgEmbed) {
-      message.channel.send(msgEmbed);
-    });
+  var page = message.content.split(' ')[2] ? message.content.split(' ')[2] : 1;
+  console.log(page);
+  if (!page || page < 1) {
+    embeds.printSingle(message, parseInt(colours.error), "Invalid page number!")
+  };
+  inv.listUnits(message, page/*message.author.id,message.guild.member(message.author).displayName*/)
+    .catch((err) => {console.error(err);})
 }
 
 function getUnit(message) {
