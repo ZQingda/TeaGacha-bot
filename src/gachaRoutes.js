@@ -9,6 +9,7 @@ var inv = require("./unit/unitinventory");
 var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
 
+
 module.exports = function (message) {
   msg = message.content.split(' ');
   //console.log(msg);
@@ -80,14 +81,20 @@ function buyCurrency(message, from, to, rate) {
 }
 
 function register(message){
-  var msgEmbedUser;
-  let u;
-  user.setupUser(message)
-    .then(function(){return inv.listUnits(message,1)})
+  user.getUser(message)
+    .then(u =>{
+      if(u.user_id==message.author.id){
+        return embeds.printSingle(message, parseInt(colours.error), "You already have a Gacha account!");
+      }
+      else{
+        return user.setupUser(message)
+        .then(function(){return inv.listUnits(message,1)})
+      }
+    })
     .catch((err) => {
       console.error('Register error : ' + err.message);
       console.error( err.stack);
-    })
+    });
 }
 
 function rollOne(message) {

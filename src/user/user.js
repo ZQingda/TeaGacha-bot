@@ -1,4 +1,6 @@
 var dbUser = require('../db/user');
+var dbGetUser = require('../db/getUser');
+
 var units = require("../unit/units");
 var embeds = require("../messages/message");
 var colours = require('../config').colours;
@@ -9,7 +11,7 @@ var colours = require('../config').colours;
  * Returns a promise after all units have been created.
  */
 function setupUser(message) {
-  const u = new User(message.author.id, {flowers:1000, energy:100});
+  const u = new User({user_id:message.author.id, flowers:1000, energy:100});
   var promise = dbUser.insertUser(u)
   .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
   .then((retUser)=>{
@@ -25,19 +27,26 @@ function setupUser(message) {
   return promise;
 }
 
+function getUser(message){
+  return dbGetUser.dbGetUserById(message.author.id)
+  .then(data => {
+    return new User(data);
+  });
+}
+
 module.exports = {
-  setupUser: setupUser
+  setupUser: setupUser,
+  getUser: getUser
 }
 
 /**
  * User Object to be used in DB calls 
- * @param {number} userId 
  * @param {object} [defaults] - Defaults to 0
  */
 var User = class {
-  constructor(userId, defaults={}) {
-    this.id = userId;
-    this.flowers = defaults.flowers? defaults.flowers : 0;
+  constructor(defaults={}) {
+    this.user_id = defaults.user_id? defaults.user_id : null;
+    this.flower = defaults.flower? defaults.flower : 0;
     this.clovers = defaults.clovers? defaults.clovers : 0;
     this.energy = defaults.energy? defaults.energy : 0;
   }

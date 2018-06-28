@@ -6,7 +6,7 @@ function insertUser(user) {
     let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
     let sqlInsertUser = 'INSERT INTO users (user_id, flower, clovers, energy) VALUES( ?, ?, ?, ?)';
     
-    db.run(sqlInsertUser, [user.id, user.flowers, user.clovers, user.energy], (err) => {
+    db.run(sqlInsertUser, [user.user_id, user.flower, user.clovers, user.energy], (err) => {
       if (err) {reject (err);}
       resolve(user);
     });
