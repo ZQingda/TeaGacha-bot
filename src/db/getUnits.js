@@ -1,6 +1,38 @@
 const sqlite3 = require('sqlite3').verbose();
 const config = require('../config.json');
 
+
+function dbGetRoster(userid) {
+  var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
+    if (err) {
+      console.error(err.message);
+      console.log("dbGetUnitRoster BEEP BOOP OH NO");
+    }
+    console.log('Connected for roster retrieval.');
+  });
+
+  let sqlquery = "SELECT * FROM units WHERE owner_id = ? AND roster != -1;"
+  let promise = new Promise(function(resolve, reject) {
+    db.all(sqlquery, [userid], (err, rows) => {
+      if (err) {
+        console.log(err);
+        reject(err);
+      }
+      console.log(rows);
+      resolve(rows);
+    });
+    db.close();
+  });
+  return promise;
+}
+
+function dbSetUnitRoster(userid, roster, unitIndex, rosterPos) {
+
+  let promise = new Promise(function(resolve, reject) {
+
+  });
+}
+
 // gets all owned units of a specified user
 // returns: Promise (array of units)
 function dbGetOwnedUnits(userid) {
@@ -64,5 +96,6 @@ function dbGetUnitByID(id) {
 
 module.exports = {
   dbGetOwnedUnits : dbGetOwnedUnits,
-  dbGetUnitByID : dbGetUnitByID
+  dbGetUnitByID : dbGetUnitByID,
+  dbGetRoster : dbGetRoster
 }

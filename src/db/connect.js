@@ -34,6 +34,7 @@ module.exports.initDB = function (db) {
   unitCreate += 'combat_type TEXT,';
   unitCreate += 'class TEXT,';
   unitCreate += 'specialization TEXT,';
+  unitCreate += 'roster INTEGER,';
   unitCreate += 'FOREIGN KEY (owner_id) REFERENCES users (user_id) on update cascade on delete cascade';
   unitCreate += ');';
 

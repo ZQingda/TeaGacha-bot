@@ -8,6 +8,7 @@ var char = require("./unit/template").char;
 var inv = require("./unit/unitinventory");
 var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
+var roster = require("./unit/unitroster");
 
 module.exports = function (message) {
   msg = message.content.split(' ');
@@ -51,10 +52,21 @@ module.exports = function (message) {
     case "ae":
       addXp(message);
       break;
+    case "listroster":
+    case "lr":
+      showRoster(message);
+      break;
     default:
       console.log(msg);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
+}
+
+function showRoster(message) {
+  roster.listRoster(message)
+    .catch((err) => {
+      console.log("listRoster err " + err.stack);
+    })
 }
 
 function modCurrencyWrap(message, currency) {
