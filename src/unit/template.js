@@ -2,9 +2,17 @@ var chars = require("./catalogue").characters;
 var pullgroups = [1,2,3,4,5,6,7];
 var rarities = [1,2,3,4,5,6,7];
 
-function pickOne(chars) { // CJ's basic fcn for random dude
-  var keys = Object.keys(chars)
-  return chars[keys[ keys.length * Math.random() << 0]];
+function pickOne(groupnum) { // CJ's basic fcn for random dude
+var filteredUnits = [];
+var keys = Object.keys(chars)
+for (var i = 0; i < keys.length; i++) {
+  if (chars[keys[i]].pull_group == groupnum) {
+    console.log(chars[keys[i]].name);
+    filteredUnits.push(chars[keys[i]]);
+  }
+}
+  var rng = Math.random();
+  return filteredUnits[filteredUnits.length * Math.random() << 0];
 }
 
 // for everything but levelling/exp, the actual level being used
@@ -14,7 +22,7 @@ function getLvl(char) {
   return Math.floor(parseFloat(char.lvl));
 }
 
-// need to sum up the chance of the current rarity with the
+// need to sum up the chance of the current rarity with the`
 // chances of the rarer rarities to get the actual
 // RNG number for rolling this rarity
 function getPullRateNum(num) {
@@ -37,7 +45,7 @@ function pullOne(chars) {
   for (var i = 1; i <= pullgroups.length; i++) {
     if (rng < getPullRateNum(i)) {
       console.log("Rolled a " + i + " pull group dude.");
-      return pickOne(chars);
+      return pickOne(i);
     }
   }
    console.log("Impossibru. But we'll pretend it's a roll 1.");
@@ -253,7 +261,7 @@ class char {
     // Some function for modifying stats based on rarity
     var rank = getRank(this.unit_name);
     this.rank = rank;
-    this.lvl = 0;
+    this.lvl = 1;
     this.atk = getATK(this.unit_name,this.lvl,this.rank,this.specialization);
     this.def = getDEF(this.unit_name,this.lvl,this.rank,this.specialization);
     this.hp = getHP(this.unit_name,this.lvl,this.rank,this.specialization);

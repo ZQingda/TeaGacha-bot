@@ -4,17 +4,17 @@ var dbGetUnitByID = require("../db/getUnits").dbGetUnitByID;
 var dbGetOwnedUnits = require("../db/getUnits").dbGetOwnedUnits;
 var embeds = require("../messages/message");
 
-function listUnits(message, page) {
+async function listUnits(message, page) {
   return dbGetOwnedUnits(message.author.id)
+
     .then(function (units) {
       console.log("Num of units: " + units.length);
       var pages = Math.ceil(units.length / 4);
       if (page > pages) {
-        embeds.printSingle(message, parseInt(colours.error), "You only have " + pages + " pages of units!");
+        embeds.printSingle(message, parseInt(colours.error), "You only have " + pages + " pages of units!")
       }
       else {
-        var pageUnits = units.splice((4 * (page - 1)), (4 * page));
-        embeds.printUnitPage(message, parseInt(colours.normal), pageUnits, page, pages);
+        embeds.printUnitPage(message, parseInt(colours.normal), units, page, pages);
       }
     })
     .catch((err) => {console.error(err);})

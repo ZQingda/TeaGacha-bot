@@ -11,11 +11,11 @@ function setCurQuery(userId, currency, amount) {
 
 function setCurrencyAsync(params) {
   return new Promise((resolve, reject) => {
-    let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
+    let db = new sqlite3.Database(config.connection, (err) => { if (err) { reject(err); } });
     let setCur = setCurQuery(params.userId, params.currency, params.setValue);
     //console.log(setCur);
     db.run(setCur, [], (err) => {
-      if (err) {reject (err);}
+      if (err) { reject(err); }
       //console.log(params.setValue + ' Value in db func')
       resolve(params.setValue);
     });
@@ -25,18 +25,22 @@ function setCurrencyAsync(params) {
 
 function getCurrencyAsync(userId, currency) {
   return new Promise((resolve, reject) => {
-    let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
+    let db = new sqlite3.Database(config.connection, (err) => { if (err) { reject(err); } });
     let getCur = getCurQuery(userId, currency);
     console.log('Query : ' + getCur);
     db.get(getCur, [], (err, row) => {
-      if (err) {reject(err);}
-      resolve(row[currency] ? row[currency] : 0);
-    }); 
+      if (err) { reject(err); }
+      if (row) {
+        resolve(row[currency] ? row[currency] : 0);
+      } else {
+        reject("User doesn't exist");
+      }
+    });
     db.close();
   })
 }
 
 module.exports = {
-  getCurrencyAsync : getCurrencyAsync,
-  setCurrencyAsync : setCurrencyAsync
+  getCurrencyAsync: getCurrencyAsync,
+  setCurrencyAsync: setCurrencyAsync
 }

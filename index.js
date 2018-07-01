@@ -6,7 +6,6 @@ const Discord = require("discord.js")
 
 var gachaDB = db.newDB('./database/gachiGacha.db');
 db.initDB(gachaDB);
-//db.insertUser(gachaDB);
 db.closeDB(gachaDB);
 
 client.on("ready", () => {
@@ -31,6 +30,7 @@ client.on("message", (message) => {
     prefixMod(message);
   } else
   if (msg.startsWith("gacha ")) {
+    console.log('Gacha');
     gachaRouter(message);
   }
   else {

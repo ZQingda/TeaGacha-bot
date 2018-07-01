@@ -4,6 +4,20 @@ var config = require("../config");
 var getLvl = require("../unit/template").getLvl;
 const Discord = require("discord.js");
 
+function unitsEmbed(msgEmbed, units, pageNum) {
+  var newEmbed = msgEmbed
+  for (var i = 0; i < units.length; i++) {
+    var curUnit = units[i];
+    var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + curUnit.lvl + "** " + curUnit.class
+      + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
+    if (i % 2 == 1) {
+      newEmbed.addBlankField(true);
+    }
+    newEmbed.addField((i + 1 + ((pageNum - 1) * config.pageLength)) + ". " + curUnit.unit_name + " [" + curUnit.unit_id + "]", details + "\n---------------------------", true);
+  }
+  return newEmbed;
+}
+
 module.exports.printSingle = function (message, colour, text) {
   var msg = {
     embed: {
@@ -11,6 +25,34 @@ module.exports.printSingle = function (message, colour, text) {
       description: text
     }
   }
+  message.channel.send(msg);
+}
+
+module.exports.printUser = function (message, colour, unit) {
+  let msg = new Discord.RichEmbed();
+  msg.setColor(colour);
+  msg.setTitle("**__" + message.guild.member(message.author).displayName + "__**");
+  msg.addField('Flowers', unit.flowers, false);
+  msg.addField('Clovers', unit.clovers, false);
+  msg.addField('Energy', unit.energy, false);
+  message.channel.send(msg);
+}
+module.exports.printNewUnit = function (message, colour, unit) {
+  var msg = {
+    embed: {
+      color: colour,
+      title: message.guild.member(message.author).displayName + " just got a new " + unit.unit_name,
+      description: '[============]\n'
+        + '~~Rank:~~ ' + unit.rank + '\n'
+        + '~~Armor:~~ ' + unit.armor_class + '\n'
+        + '~~Combat:~~ ' + unit.combat_type + '\n'
+        + '~~Attack:~~ ' + unit.atk + '\n'
+        + '~~Defence:~~ ' + unit.def + '\n'
+        + '~~Speed:~~ ' + unit.spd + '\n'
+        + '~~Health:~~ ' + unit.hp + '\n\n'
+        + '[============]'
+    }
+  };
   message.channel.send(msg);
 }
 
@@ -24,18 +66,83 @@ module.exports.printCurrency = function (message, colour, currency, curValue) {
   message.channel.send(msg);
 }
 
-module.exports.printUnitPage = function (message, colour, units, curPage, maxPage) {
+module.exports.printRoster = async function (message, colour, units) {
   var msgEmbed = new Discord.RichEmbed();
-  msgEmbed.setColor(parseInt(config.colours.normal));
-  msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
-  for (var i = 0; i < units.length; i++) {
-    var curUnit = units[i];
-    var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + getLvl(curUnit) + "** " + curUnit.class
-      + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
+  console.log("ROSTER : " + units);
+  msgEmbed.setColor(colour);
+  msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s roster__**");
+  for (var i = 0; i < 5; i++) {
+    let found = false;
+    for (var j = 0; j < units.length; j++) {
+      if (units[j].roster == (i + 1)) {
+        found = true;
+        var curUnit = units[j];
+        var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + curUnit.lvl + "** " + curUnit.class
+          + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
+        
+        msgEmbed.addField((i + 1) + ". " + curUnit.unit_name + " [" + curUnit.unit_id + "]", details + "\n---------------------------", true);
+      }
+    }
+    //if (!found) {
+    //  msgEmbed.addField((i + 1) + ".", "\n\n\n\n---------------------------", true);
+    //}
     if (i % 2 == 1) {
       msgEmbed.addBlankField(true);
     }
-    msgEmbed.addField(i + ". " + curUnit.unit_name, details + "\n---------------------------", true);
   }
   message.channel.send(msgEmbed);
 }
+
+module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
+  var curPage = parseInt(p1);
+  var maxPage = p2;
+  var pl = config.pageLength;
+  console.log(curPage, '     ', maxPage);
+  var pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
+  var msgEmbed = new Discord.RichEmbed();
+  msgEmbed.setColor(colour);
+  msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
+  msgEmbed = unitsEmbed(msgEmbed, pageUnits, curPage);
+
+  var filterPrev = (reaction, user) => { return (reaction.emoji.name === '◀' && user.id === message.author.id) };
+  var filterNext = (reaction, user) => { return (reaction.emoji.name === '▶' && user.id === message.author.id) };
+
+  var response = await message.channel.send(msgEmbed);
+  console.log("curPage initially " + curPage);
+
+
+  if (maxPage != 1) {
+    await response.react("◀");
+    await response.react("▶");
+
+    const collectPrev = response.createReactionCollector(filterPrev, { time: 15000 });
+    collectPrev.on('collect', async (r1) => {
+      console.log('CATCH PREV : ' + r1);
+      if (curPage > 1) {
+        curPage -= 1;
+        console.log("CurPage down to " + curPage);
+      }
+      var newMsg = new Discord.RichEmbed();
+      newMsg.setColor(colour);
+      newMsg.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
+      pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
+      newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      response.edit(newMsg);
+    });
+    const collectNext = response.createReactionCollector(filterNext, { time: 15000 });
+    collectNext.on('collect', async (r2) => {
+      console.log('CATCH NEXT : ' + r2);
+      if (curPage < maxPage) {
+        curPage += 1;
+        console.log("CurPage up to " + curPage);
+      }
+      var newMsg = new Discord.RichEmbed();
+      newMsg.setColor(colour);
+      newMsg.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
+      pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
+      newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      response.edit(newMsg)
+    });
+  }
+}
+

@@ -1,17 +1,22 @@
 const Discord = require("discord.js");
-var dbAddChar = require("./db/addChars").dbAddChar;
+var colours = require('./config').colours;
 var cur = require("./currency/currency");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
-const config = require('./config.json');
+const config = require('./config');
 var char = require("./unit/template").char;
 var inv = require("./unit/unitinventory");
+var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
+var roster = require("./unit/unitroster");
 
 module.exports = function (message) {
   msg = message.content.split(' ');
   //console.log(msg);
   switch (msg[1]) {
+    case "register":
+      register(message);
+      break;
     case "rollOne":
     case "ro":
       rollOne(message);
@@ -47,10 +52,25 @@ module.exports = function (message) {
     case "ae":
       addXp(message);
       break;
+    case "upgradeunit":
+    case "uu":
+      sacUnit(message);
+      break;
+    case "listroster":
+    case "lr":
+      showRoster(message);
+      break;
     default:
       console.log(msg);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
+}
+
+function showRoster(message) {
+  roster.listRoster(message)
+    .catch((err) => {
+      console.log("listRoster err " + err.stack);
+    })
 }
 
 function modCurrencyWrap(message, currency) {
@@ -75,15 +95,22 @@ function buyCurrency(message, from, to, rate) {
     })
 }
 
-function rollOne(message) {
-  cur.modCurrency(message, 'clovers', -10)
-    .then((params) => {
-      return new Promise((resolve) => {
-        var char = units.genOne(message);
-        resolve({char : char});
-      })
+function register(message){
+  var msgEmbedUser;
+  let u;
+  user.setupUser(message)
+    .then(function(){return inv.listUnits(message,1)})
+    .catch((err) => {
+      console.error('Register error : ' + err.message);
+      console.error( err.stack);
     })
-    .then(dbAddChar)
+}
+
+function rollOne(message) {
+  Promise
+  cur.modCurrency(message, 'clovers', -1)
+    .then((ret)=>{return units.genOne(message.author.id)})
+    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
     .catch((err) => {
       console.error('rollOne routes error : ' + err.stack);
     })
@@ -95,9 +122,10 @@ function getChars(message) {
   console.log(page);
   if (!page || page < 1) {
     embeds.printSingle(message, parseInt(colours.error), "Invalid page number!")
-  };
+  } else {
   inv.listUnits(message, page/*message.author.id,message.guild.member(message.author).displayName*/)
     .catch((err) => {console.error(err);})
+  }
 }
 
 function getUnit(message) {
@@ -120,5 +148,25 @@ function addXp(message) {
     } else {
       message.channel.send("EXP Add Failed.");
     }
+  });
+}
+
+function sacUnit(message) {
+  var idTarg = message.content.split(" ")[2];
+  var idSac = message.content.split(" ")[3];
+  console.log("Feeding unit " + idSac + " to " + idTarg);
+  modU.feedUnit(idTarg, idSac)
+  .then(function(names) {
+    if (names != false) {
+      message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
+      inv.showUnit(idTarg)
+      .then(function(msgEmbed) {
+        message.channel.send(msgEmbed);
+      });
+    }
+    inv.showUnit(unit_id)
+    .then(function(msgEmbed) {
+      message.channel.send(msgEmbed);
+    });
   });
 }
