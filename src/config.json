@@ -4,5 +4,5 @@
   "normal" : "0x2eb8b8"
   },
   "connection" : "./database/gachiGacha.db",
-  "pageLength" : 4
+  "pageLength" : 8
 }
