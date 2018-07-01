@@ -4,3 +4,4 @@ package-lock.json
 config.js
 /config.json
 package-lock.json
+.vscode/
