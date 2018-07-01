@@ -2,6 +2,7 @@ var chars = require("./catalogue").characters;
 var colours = require('../config').colours;
 var dbGetUnitByID = require("../db/getUnits").dbGetUnitByID;
 var dbGetOwnedUnits = require("../db/getUnits").dbGetOwnedUnits;
+var dbGetUnitByUserIndex = require("../db/getUnits").dbGetUnitByUserIndex;
 var embeds = require("../messages/message");
 
 async function listUnits(message, page) {
@@ -20,8 +21,8 @@ async function listUnits(message, page) {
     .catch((err) => {console.error(err);})
 }
 
-function showUnit(id) {
-  var promise = dbGetUnitByID(id)
+function showUnit(user_id, unit_index) {
+  var promise = dbGetOwnedUnits(user_id, unit_index)
   .then(function (unit) {
     var msgEmbed = new Discord.RichEmbed();
     if (unit == null) {

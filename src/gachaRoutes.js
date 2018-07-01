@@ -121,8 +121,8 @@ function getChars(message) {
 
 function getUnit(message) {
   console.log("getUnit");
-  var unit_id = message.content.split(" ")[2];
-  inv.showUnit(unit_id)
+  var unit_index = message.content.split(" ")[2];
+  inv.showUnit(message.author.id, unit_index)
   .then(function(msgEmbed) {
     message.channel.send(msgEmbed);
   });

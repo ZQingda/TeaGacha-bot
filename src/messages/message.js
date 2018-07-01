@@ -13,7 +13,7 @@ function unitsEmbed(msgEmbed, units) {
     if (i % 2 == 1) {
       newEmbed.addBlankField(true);
     }
-    newEmbed.addField(i + ". " + curUnit.unit_name, details + "\n---------------------------", true);
+    newEmbed.addField(curUnit.unit_index + ". " + curUnit.unit_name, details + "\n---------------------------", true);
   }
   return newEmbed;
 }
