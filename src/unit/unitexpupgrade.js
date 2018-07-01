@@ -1,6 +1,7 @@
 var chars = require("./catalogue").characters;
 var dbGetChars = require("../db/getUnits");
 var dbModChars = require("../db/modUnits");
+var dbRemoveChars = require("../db/removeUnits");
 var icons = require("../icons/unitIcons");
 var stats = require("./template");
 const config = require('../config.json');
@@ -32,11 +33,11 @@ function addExp(id,exp) {
   return promise;
 }
 
+// fixes the stats to be what they're supposed to be
 function adjustStats(id) {
   var promise = dbGetChars.dbGetUnitByID(id)
   .then(function (unit) {
     console.log(unit.unit_name);
-    // OK GUYS I KNOW THIS IS LITERALLY CANCER BUT ILL FIX IT LATER
     var newatk = stats.getATK(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
     var newdef = stats.getDEF(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
     var newhp = stats.getHP(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
@@ -46,7 +47,78 @@ function adjustStats(id) {
   return promise;
 }
 
+function addModdedEXP(id, level, rank, exp) {
+  var moddedEXP = exp;
+  var levelmod = -(((level^1.5)/(100*10)) - 1);
+  var rankmod = -(((level^1.5)/(10*10)) - 1);
+  moddedEXP = exp * levelmod * rankmod;
+  console.log("Actual EXP gained: " + moddedEXP + ", LVLMod:" + levelmod + ", RANKMOD:" + rankmod);
+  return addExp(id, moddedEXP);
+}
+
+function getFeedEXPValue(sacLevel,sacRank,targArmor,targCombat,sacArmor,sacCombat) {
+  var expVal = Number(sacLevel / 20);
+  const rankMultiplier = ((sacRank^2)/50);
+  var armorMultiplier = 1;
+  var combatMultiplier = 1;
+  if (targArmor == sacArmor) {
+    armorMultiplier = 1.25;
+  }
+  if (targCombat == sacCombat) {
+    combatMultiplier = 1.25;
+  }
+  expVal = expVal * rankMultiplier * armorMultiplier * combatMultiplier;
+  console.log("Feed EXP Value: " + expVal);
+  return expVal;
+}
+
+function feedUnit(userid, indexTarg, indexSacrifice) {
+  var sacName;
+  var targName;
+  var prevLvl;
+  var sacId;
+
+  var promise = dbGetChars.dbGetUnitByIndexMulti(userid, [indexTarg,indexSacrifice])
+  .then(function (units) {
+    var charTarg;
+    var charSac;
+
+    if (units[0].inv_index == indexTarg) {
+      charTarg = units[0];
+      charSac = units[1];
+    } else {
+      charTarg = units[1];
+      charSac = units[0];
+    }
+    
+    sacId = charSac.unit_id;
+    sacName = charSac.unit_name;
+    targName = charTarg.unit_name;
+    prevLvl = stats.getLvl(charTarg);
+    console.log("Targ: " + targName + " , Sac: " + sacName);
+    var exp = getFeedEXPValue(charSac.lvl,charSac.rank,charTarg.armor_class,charTarg.combat_type,charSac.armor_class,charSac.combat_type);
+    return addModdedEXP(charTarg.unit_id,charTarg.lvl,charTarg.rank,exp);
+  })
+  .then(function (success) {
+    if (success) {
+      return dbRemoveChars.dbDeleteUnit(sacId);
+    } else {
+      return false;
+    }
+  })
+  .then(function (success) {
+    if (success) {
+      return [sacName, targName, prevLvl];
+    } else {
+      return false;
+    }
+  });
+  return promise;
+}
+
+
 module.exports = {
   addExp : addExp,
-  adjustStats : adjustStats
+  adjustStats : adjustStats,
+  feedUnit : feedUnit
 }

@@ -8,6 +8,7 @@ var char = require("./unit/template").char;
 var inv = require("./unit/unitinventory");
 var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
+var roster = require("./unit/unitroster");
 
 
 module.exports = function (message) {
@@ -52,10 +53,25 @@ module.exports = function (message) {
     case "ae":
       addXp(message);
       break;
+    case "upgradeunit":
+    case "uu":
+      sacUnit(message);
+      break;
+    case "listroster":
+    case "lr":
+      showRoster(message);
+      break;
     default:
       console.log(msg);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
+}
+
+function showRoster(message) {
+  roster.listRoster(message)
+    .catch((err) => {
+      console.log("listRoster err " + err.stack);
+    })
 }
 
 function modCurrencyWrap(message, currency) {
@@ -121,11 +137,9 @@ function getChars(message) {
 
 function getUnit(message) {
   console.log("getUnit");
-  var unit_index = message.content.split(" ")[2];
-  inv.showUnit(message.author.id, unit_index)
-  .then(function(msgEmbed) {
-    message.channel.send(msgEmbed);
-  });
+  var index = message.content.split(" ")[2];
+  inv.showUnit(message, index)
+  .catch((err) => {console.error(err.stack);});
 }
 
 function addXp(message) {
@@ -140,4 +154,21 @@ function addXp(message) {
       message.channel.send("EXP Add Failed.");
     }
   });
+}
+
+function sacUnit(message) {
+  var indexTarg = message.content.split(" ")[2];
+  var indexSac = message.content.split(" ")[3];
+  console.log("Feeding unit " + indexSac + " to " + indexTarg);
+  modU.feedUnit(message.author.id, indexTarg, indexSac)
+  .then(function(names) {
+    if (names != false) {
+      message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
+      inv.showUnit(message, indexTarg);
+    }
+  })
+  .catch((err) => {
+    embeds.printSingle(message, parseInt(colours.error), err)
+    console.error(err.stack);}
+  );
 }
