@@ -2,6 +2,66 @@ var chars = require("./catalogue").characters;
 var pullgroups = [1,2,3,4,5,6,7];
 var rarities = [1,2,3,4,5,6,7];
 
+
+
+// for everything but levelling/exp, the actual level being used
+// is the floor
+function getLvl(char) {
+  console.log("Level: " + char.lvl);
+  return Math.floor(parseFloat(char.lvl));
+}
+
+// returns the number of ranks
+function getRankCount() {
+  return rarities.length;
+}
+
+// returns the point cost of a unit
+function getPointCost(char) {
+  var ptc = chars[char.unit_name].pull_group/2;
+  ptc *= char.rank;
+}
+
+// these getSTAT functions use the unit and other properties to
+// determine the correct stat value
+function getATK(name, level, rank, specialization) {
+  var template_char = chars[name];
+  var val = baseStats.atk[template_char.class];
+  val += (rank/2) * baseStats.atk[template_char.class];
+  val += statsPerLevel.atk[rank] * level;
+  val *= template_char.atk_modifier;
+  return Math.ceil(val);
+}
+
+// def is a bit of a special case because it scales off
+// armor type rather than class
+function getDEF(name, level, rank, specialization) {
+  var template_char = chars[name];
+  var val = baseStats.def[template_char.armor];
+  val += (rank/2) * baseStats.def[template_char.armor];
+  val += statsPerLevel.def[rank] * level;
+  val *= template_char.def_modifier;
+  return Math.ceil(val);
+}
+
+function getHP(name, level, rank, specialization) {
+  var template_char = chars[name];
+  var val = baseStats.hp[template_char.class];
+  val += (rank/2) * baseStats.hp[template_char.class];
+  val += statsPerLevel.hp[rank] * level;
+  val *= template_char.hp_modifier;
+  return Math.ceil(val);
+}
+
+function getSPD(name, level, rank, specialization) {
+  var template_char = chars[name];
+  var val = baseStats.spd[template_char.class];
+  val += (rank/2) * baseStats.spd[template_char.class];
+  val += statsPerLevel.spd[rank] * level;
+  val *= template_char.spd_modifier;
+  return Math.ceil(val);
+}
+
 function pickOne(groupnum) { // CJ's basic fcn for random dude
 var filteredUnits = [];
 var keys = Object.keys(chars)
@@ -13,17 +73,6 @@ for (var i = 0; i < keys.length; i++) {
 }
   var rng = Math.random();
   return filteredUnits[filteredUnits.length * Math.random() << 0];
-}
-
-// for everything but levelling/exp, the actual level being used
-// is the floor
-function getLvl(char) {
-  console.log("Level: " + char.lvl);
-  return Math.floor(parseFloat(char.lvl));
-}
-
-function getRankCount() {
-  return rarities.length;
 }
 
 // need to sum up the chance of the current rarity with the`
@@ -94,47 +143,6 @@ function getRank(name) {
     }
   }
 }
-
-// these getSTAT functions use the unit and other properties to
-// determine the correct stat value
-function getATK(name, level, rank, specialization) {
-  var template_char = chars[name];
-  var val = baseStats.atk[template_char.class];
-  val += (rank/2) * baseStats.atk[template_char.class];
-  val += statsPerLevel.atk[rank] * level;
-  val *= template_char.atk_modifier;
-  return Math.ceil(val);
-}
-
-// def is a bit of a special case because it scales off
-// armor type rather than class
-function getDEF(name, level, rank, specialization) {
-  var template_char = chars[name];
-  var val = baseStats.def[template_char.armor];
-  val += (rank/2) * baseStats.def[template_char.armor];
-  val += statsPerLevel.def[rank] * level;
-  val *= template_char.def_modifier;
-  return Math.ceil(val);
-}
-
-function getHP(name, level, rank, specialization) {
-  var template_char = chars[name];
-  var val = baseStats.hp[template_char.class];
-  val += (rank/2) * baseStats.hp[template_char.class];
-  val += statsPerLevel.hp[rank] * level;
-  val *= template_char.hp_modifier;
-  return Math.ceil(val);
-}
-
-function getSPD(name, level, rank, specialization) {
-  var template_char = chars[name];
-  var val = baseStats.spd[template_char.class];
-  val += (rank/2) * baseStats.spd[template_char.class];
-  val += statsPerLevel.spd[rank] * level;
-  val *= template_char.spd_modifier;
-  return Math.ceil(val);
-}
-
 
 const baseStats = {
   "hp" : {
