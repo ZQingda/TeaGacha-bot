@@ -11,7 +11,6 @@ function setCurrencyAsync(params) {
       if (err) { reject(err); }
       //console.log(params.setValue + ' Value in db func')
       resolve(params.setValue);
-      return getCurrencyAsync(params.userId, params.currency);
     });
     db.close();
   });

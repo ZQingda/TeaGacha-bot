@@ -8,11 +8,12 @@ function updateAllUserEnergy(modifier){
   return new Promise(function(resolve, reject) {
     db.run(sqlquery, [modifier], (err) => {
       if (err) {
-          return console.error(err.stack);
+        reject(err);
+      }else{
+        resolve(true);
       }
     });
     db.close();
-    resolve(true);
   });
 }
 
@@ -23,11 +24,12 @@ function updateMaxEnergy(userId, modifier){
   return new Promise(function(resolve, reject) {
     db.run(sqlquery, [modifier], (err) => {
       if (err) {
-          return console.error(err.stack);
+        reject(err);
+      }else{
+        resolve(true);
       }
     });
     db.close();
-    resolve(true);
   });
 }
 

@@ -75,13 +75,7 @@ function dbGetOwnedUnits(userid) {
 // gets a single unit by its unit id
 // returns: Promise (unit)
 function dbGetUnitByID(id) {
-  var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
-    if (err) {
-      console.error(err.message);
-    }
-    console.log('Connected for char retrieval.');
-  });
-
+  let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {if (err) {reject(err);}});
   let sqlquery = "SELECT * FROM units WHERE unit_id = ?;";
   let promise = new Promise(function(resolve, reject) {
     db.get(sqlquery, [id], (err, row) => {
@@ -96,7 +90,6 @@ function dbGetUnitByID(id) {
         resolve(row);
       }
     });
-
     db.close();
   });
   return promise;
@@ -156,7 +149,8 @@ function dbGetUnitByIndex(userid, index) {
         console.log(err);
       }
       if (row !== null) {
-        console.log("Got a unit.");
+        console.log("Got a unit:");
+        console.log(row);
         resolve(row);
       } else {
         console.log("No user found with that ID.");

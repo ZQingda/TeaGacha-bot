@@ -30,8 +30,24 @@ function showUnit(message, index) {
   .then(function (unit) {
     if (unit == null) {
       embeds.printSingle(message, parseInt(colours.error), "The unit could not be found.")
+      return false;
     } else {
       embeds.printUnit(message, parseInt(colours.normal), unit);
+      return true;
+    }
+  })
+  .catch((err) => {console.error(err.stack);});
+}
+
+function showUnitById(message, id) {
+  return dbGetUnitByID(id)
+  .then(function (unit) {
+    if (unit == null) {
+      embeds.printSingle(message, parseInt(colours.error), "The unit could not be found.")
+      return false;
+    } else {
+      embeds.printUnit(message, parseInt(colours.normal), unit);
+      return true;
     }
   })
   .catch((err) => {console.error(err.stack);});
@@ -43,5 +59,6 @@ function getUnits(user_id, indexes){
 
 module.exports = {
   listUnits: listUnits,
-  showUnit: showUnit
+  showUnit: showUnit,
+  showUnitById: showUnitById
 }

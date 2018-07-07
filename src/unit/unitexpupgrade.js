@@ -34,7 +34,6 @@ function addExp(id,exp) {
 function adjustStats(id) {
   var promise = dbGetChars.dbGetUnitByID(id)
   .then(function (unit) {
-    console.log(unit.unit_name);
     var newatk = stats.getATK(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
     var newdef = stats.getDEF(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
     var newhp = stats.getHP(unit.unit_name,stats.getLvl(unit),unit.rank,unit.specialization);
@@ -113,7 +112,7 @@ function feedUnit(userid, indexTarg, indexSacrifice) {
   return promise;
 }
 
-// returns: a promise returning a string
+// returns: a promise returning the id of indexTarg if successfull
 function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
   const min_sac_level = 20;
   const num_of_sac = 3;
@@ -150,6 +149,7 @@ function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
 
   })
   .then(function (success) {
+    console.log(success);
     if (success == true) {
       return dbModChars.modUnitMulti(charTarg.unit_id,["lvl", "rank"],[1,Number(charTarg.rank + 1)]);
     } else {
@@ -161,6 +161,13 @@ function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
       return adjustStats(charTarg.unit_id);
     } else {
       return success;
+    }
+  })
+  .then(function(success){
+    if(success){
+      return charTarg.unit_id;
+    }else{
+      reject(success);
     }
   });
   return promise;

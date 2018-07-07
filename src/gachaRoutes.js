@@ -22,8 +22,8 @@ module.exports = function (message) {
     case "ro":
       rollOne(message);
       break;
-    case "listchars":
-    case "lc":
+    case "listunits":
+    case "lu":
       getChars(message);
       break;
     case "modclovers":
@@ -200,12 +200,13 @@ function upgrUnit(message) {
   indexSac[2] = message.content.split(" ")[5];
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
   modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2])
-  .then(function(success) {
-    if (success == true) {
+  .then(function(target_id) {
+    if (target_id) {
       embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
-      return inv.showUnit(message, indexTarg);
+      
+      return inv.showUnitById(message, target_id);
     } else {
-      embeds.printSingleError(message, success);
+      embeds.printSingleError(message, "Target Id not Returned after Upgrade Unit");
       return false;
     }
   })
@@ -215,8 +216,11 @@ function upgrUnit(message) {
     } else {
       console.log("failed sacrifice");
     }
-
-  });
+  })
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error(err.stack);}
+  );
 }
 
 function showRankLegend(message) {

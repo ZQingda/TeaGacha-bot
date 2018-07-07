@@ -50,6 +50,7 @@ module.exports.printUser = function (message, colour, user) {
   message.channel.send(msg);
 }
 module.exports.printUnit = function(message, colour, unit){
+  console.log("**ATK** " + unit.atk + " / **DEF** " + unit.def + " / **HP** " + unit.hp + " / **SPD** " + unit.spd);
   let msg = new Discord.RichEmbed();
   msg.setColor(colour);
   msg.setTitle(icons.getRankIcon(unit.rank) + " " + unit.unit_name);
