@@ -21,10 +21,7 @@ function addExp(id,exp) {
     return dbModChars.modUnit(id,"lvl",newlvl);
   })
   .then(function (success) {
-    if (success) {
-      if (newlvl == 80) {
-        return true;
-      }
+    if (success == true) {
       return adjustStats(id);
     } else {
       return false;
@@ -90,7 +87,7 @@ function feedUnit(userid, indexTarg, indexSacrifice) {
       charTarg = units[1];
       charSac = units[0];
     }
-    
+
     sacId = charSac.unit_id;
     sacName = charSac.unit_name;
     targName = charTarg.unit_name;
@@ -116,9 +113,63 @@ function feedUnit(userid, indexTarg, indexSacrifice) {
   return promise;
 }
 
+// returns: a promise returning a string
+function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
+  const min_sac_level = 20;
+  const num_of_sac = 3;
+  var charTarg;
+  var charSacs;
+  var promise = dbGetChars.dbGetUnitByIndex(userid, indexTarg)
+  .then(function (unit) {
+    charTarg = unit;
+    return charTarg;
+  })
+  .then(function (unit) {
+    return dbGetChars.dbGetUnitByIndexMulti(userid, [sac1,sac2,sac3]);
+  })
+  .then(function (units) {
+    charSacs = units;
+    console.log("First sac: " + charSacs[0].unit_id);
+    console.log("Second sac: " + charSacs[1].unit_id);
+    console.log("Third sac: " + charSacs[2].unit_id);
+    for (var i = 0; i < num_of_sac; i++) { // check if sacs are up to snuff
+      if (stats.getLvl(charSacs[i]) < min_sac_level || charSacs[i].rank != charTarg.rank) {
+        return "Sacrificial units levels too low or ranks don't match up.";
+      }
+    }
+
+    if (stats.getLvl(charTarg) != 80) { // check if char is lv80
+      return "Target unit is not max level.";
+    }
+
+    if (charTarg.rank == chars[charTarg.unit_name].max_rank) {
+      return "Target unit cannot be upgraded any further.";
+    }
+
+    return dbRemoveChars.dbDeleteUnitMulti([charSacs[0].unit_id, charSacs[1].unit_id, charSacs[2].unit_id]);
+
+  })
+  .then(function (success) {
+    if (success == true) {
+      return dbModChars.modUnitMulti(charTarg.unit_id,["lvl", "rank"],[1,Number(charTarg.rank + 1)]);
+    } else {
+      return success;
+    }
+  })
+  .then(function (success) {
+    if (success == true) {
+      return adjustStats(charTarg.unit_id);
+    } else {
+      return success;
+    }
+  });
+  return promise;
+}
+
 
 module.exports = {
   addExp : addExp,
   adjustStats : adjustStats,
-  feedUnit : feedUnit
+  feedUnit : feedUnit,
+  upgradeUnit : upgradeUnit
 }

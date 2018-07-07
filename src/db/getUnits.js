@@ -93,7 +93,7 @@ function dbGetUnitByID(id) {
   });
   return promise;
 }
-  
+
 // gets at least 2 units from the DB. AT LEAST 2.
 // returns: promise
 function dbGetUnitByIDMulti(ids) {
@@ -130,8 +130,8 @@ function dbGetUnitByIDMulti(ids) {
 
 /**
  * Get a single units by its userId & Inventory Index.
- * @param {Number} userid 
- * @param {Number} index 
+ * @param {Number} userid
+ * @param {Number} index
  * @returns Promise ({Object} unit) unit will be null if it doesn't exist.
  */
 function dbGetUnitByIndex(userid, index) {
@@ -164,8 +164,8 @@ function dbGetUnitByIndex(userid, index) {
 
 /**
  * gets at least 2 units from the DB. AT LEAST 2.
- * @param {Number} userid 
- * @param {Array} indexes 
+ * @param {Number} userid
+ * @param {Array} indexes
  * @returns promise DB Rows
  */
 function dbGetUnitByIndexMulti(userid, indexes) {
@@ -211,8 +211,8 @@ function dbGetUnitByIndexMulti(userid, indexes) {
 
 /**
  * Get a single units DB Id by its userId & Inventory Index.
- * @param {Number} userid 
- * @param {Number} index 
+ * @param {Number} userid
+ * @param {Number} index
  * @returns Promise ({Number} unit_id)
  */
 function dbGetUnitIdByIndex(userid, index) {
@@ -227,8 +227,8 @@ function dbGetUnitIdByIndex(userid, index) {
 }
 /**
  * Get a single units DB Id by its userId & Inventory Index.
- * @param {Number} userid 
- * @param {Number} index 
+ * @param {Number} userid
+ * @param {Number} index
  * @returns Promise ({Number} unit_id)
  */
 function dbGetUnitIdByIndexMulti(userid, index) {
@@ -249,5 +249,5 @@ module.exports = {
   dbGetUnitIdByIndex : dbGetUnitIdByIndex,
   dbGetUnitIdByIndexMulti : dbGetUnitIdByIndexMulti,
 
-  dbGetRoster : dbGetRoster  
+  dbGetRoster : dbGetRoster
 }

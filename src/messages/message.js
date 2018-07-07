@@ -2,6 +2,8 @@ var pad = require('pad-left');
 var icons = require("../icons/unitIcons");
 var config = require("../config");
 var getLvl = require("../unit/template").getLvl;
+var templ = require("../unit/template");
+
 const Discord = require("discord.js");
 
 function unitsEmbed(msgEmbed, units, pageNum) {
@@ -22,6 +24,16 @@ module.exports.printSingle = function (message, colour, text) {
   var msg = {
     embed: {
       color: colour,
+      description: text
+    }
+  }
+  message.channel.send(msg);
+}
+
+module.exports.printSingleError = function (message, text) {
+  var msg = {
+    embed: {
+      color: parseInt(config.colours.error),
       description: text
     }
   }
@@ -90,7 +102,7 @@ module.exports.printRoster = async function (message, colour, units) {
         var curUnit = units[j];
         var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + curUnit.lvl + "** " + curUnit.class
           + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
-        
+
         msgEmbed.addField((i + 1) + ". " + curUnit.unit_name + " [" + curUnit.unit_id + "]", details + "\n---------------------------", true);
       }
     }
@@ -157,3 +169,10 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
   }
 }
 
+module.exports.printUnitRanks = function (message) {
+  var legend = "";
+  for (var i = templ.getRankCount(); i > 0; i--) {
+    legend += icons.getRankIcon(i) + "\n";
+  }
+  module.exports.printSingle(message, parseInt(config.colours.normal), legend);
+}
