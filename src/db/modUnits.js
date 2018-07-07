@@ -9,7 +9,7 @@ function modUnit(id,field,newval) {
     console.log('Connected for char modification.');
   });
 
-  let sqlquery = "UPDATE units SET " + field + " = ? WHERE unit_id = ?;"
+  let sqlquery = "UPDATE units SET "+field+" = ? WHERE unit_id = ?;"
   let promise = new Promise(function(resolve, reject) {
     db.run(sqlquery, [newval,id], (err) => {
           if (err) {

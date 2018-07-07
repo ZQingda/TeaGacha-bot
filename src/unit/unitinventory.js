@@ -1,5 +1,6 @@
 var chars = require("./catalogue").characters;
 var colours = require('../config').colours;
+var pageLength = require('../config').pageLength;
 var dbGetUnitByID = require("../db/getUnits").dbGetUnitByID;
 var dbGetOwnedUnits = require("../db/getUnits").dbGetOwnedUnits;
 var dbGetUnitByIndex = require("../db/getUnits").dbGetUnitByIndex;
@@ -12,7 +13,8 @@ async function listUnits(message, page) {
 
     .then(function (units) {
       console.log("Num of units: " + units.length);
-      var pages = Math.ceil(units.length / 4);
+      var pages = Math.ceil(units.length / pageLength);
+      console.log('PAGES : ' + pages);
       if (page > pages) {
         embeds.printSingle(message, parseInt(colours.error), "You only have " + pages + " pages of units!")
       }

@@ -11,7 +11,7 @@ var colours = require('../config').colours;
  * Returns a promise after all units have been created.
  */
 function setupUser(message) {
-  const u = new User({user_id:message.author.id, flowers:1000, energy:100});
+  const u = new User({user_id:message.author.id, energy:20, energy_max:20});
   var promise = dbUser.insertUser(u)
   .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
   .then((retUser)=>{
@@ -41,7 +41,7 @@ module.exports = {
 
 /**
  * User Object to be used in DB calls 
- * @param {object} [defaults] - Defaults to 0
+ * @param {object} [defaults] - values to assign to the instance
  */
 var User = class {
   constructor(defaults={}) {
@@ -49,5 +49,6 @@ var User = class {
     this.flower = defaults.flower? defaults.flower : 0;
     this.clovers = defaults.clovers? defaults.clovers : 0;
     this.energy = defaults.energy? defaults.energy : 0;
+    this.energy_max = defaults.energy_max? defaults.energy_max : 0;
   }
 }

@@ -16,7 +16,8 @@ module.exports.initDB = function (db) {
   userCreate += 'username TEXT UNIQUE,';
   userCreate += 'flower INTEGER,';
   userCreate += 'clovers INTEGER,';
-  userCreate += 'energy INTEGER';
+  userCreate += 'energy	INTEGER NOT NULL DEFAULT 0,';
+  userCreate += 'energy_max	INTEGER NOT NULL DEFAULT 0';
   userCreate += ');';
 
   var unitCreate = 'CREATE TABLE IF NOT EXISTS units (';

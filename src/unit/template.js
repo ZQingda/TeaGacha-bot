@@ -22,6 +22,10 @@ function getLvl(char) {
   return Math.floor(parseFloat(char.lvl));
 }
 
+function getRankCount() {
+  return rarities.length;
+}
+
 // need to sum up the chance of the current rarity with the`
 // chances of the rarer rarities to get the actual
 // RNG number for rolling this rarity
@@ -226,10 +230,10 @@ const chanceRates = {
     7 : 0.0,
     6 : 0.0,
     5 : 0.05,
-    4 : 0.2,
-    3 : 0.3,
-    2 : 0.3,
-    1 : 0.2
+    4 : 0.25,
+    3 : 0.55,
+    2 : 0.1,
+    1 : 0.05
   }
 }
 
@@ -275,5 +279,6 @@ module.exports = {
   getDEF : getDEF,
   getHP : getHP,
   getSPD : getSPD,
-  char : char
+  char : char,
+  getRankCount : getRankCount
 }

@@ -1,12 +1,10 @@
 const Discord = require("discord.js")
     , config = require("./config")
     , client = new Discord.Client()
-    , db = require("./src/db/connect")
-    , gachaRouter = require("./src/gachaRoutes");
+    , gachaRouter = require("./src/gachaRoutes")
+    , gachaInit = require("./src/gachaInit");
 
-var gachaDB = db.newDB('./database/gachiGacha.db');
-db.initDB(gachaDB);
-db.closeDB(gachaDB);
+gachaInit();
 
 client.on("ready", () => {
   console.log("I am ready!");

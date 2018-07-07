@@ -1,3 +1,4 @@
+var dbEnergy = require('../db/energy');
 var dbCurrency = require('../db/currency');
 var colours = require('../config').colours;
 var embeds = require('../messages/message');

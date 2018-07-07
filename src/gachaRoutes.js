@@ -50,18 +50,28 @@ module.exports = function (message) {
     case "su":
       getUnit(message);
       break;
+    case "showuser":
+        getUser(message);
+      break;
     case "ae":
       addXp(message);
       break;
-    case "upgradeunit":
-    case "uu":
+    case "feedunit":
+    case "fu":
       sacUnit(message);
       break;
     case "listroster":
     case "lr":
       showRoster(message);
       break;
-    default:
+    case "upgradeunit":
+    case "uu":
+      upgrUnit(message);
+      break;
+    case "iconlegend":
+      showRankLegend(message);
+      break;
+    default:````````````````````````````````````````````````````````````````
       console.log(msg);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
@@ -142,6 +152,14 @@ function getUnit(message) {
   .catch((err) => {console.error(err.stack);});
 }
 
+function getUser(message){
+  console.log("getUser");
+  user.getUser(message)
+  .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
+  .catch((err) => {console.error(err.stack);});
+}
+
+
 function addXp(message) {
   console.log("Add EXP");
   var unit_id = message.content.split(" ")[2];
@@ -155,6 +173,7 @@ function addXp(message) {
     }
   });
 }
+
 
 function sacUnit(message) {
   var indexTarg = message.content.split(" ")[2];
@@ -171,4 +190,35 @@ function sacUnit(message) {
     embeds.printSingle(message, parseInt(colours.error), err)
     console.error(err.stack);}
   );
+}
+
+function upgrUnit(message) {
+  var indexTarg = message.content.split(" ")[2];
+  var indexSac = [0,0,0];
+  indexSac[0] = message.content.split(" ")[3];
+  indexSac[1] = message.content.split(" ")[4];
+  indexSac[2] = message.content.split(" ")[5];
+  console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
+  modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2])
+  .then(function(success) {
+    if (success == true) {
+      embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
+      return inv.showUnit(message, indexTarg);
+    } else {
+      embeds.printSingleError(message, success);
+      return false;
+    }
+  })
+  .then(function(success) {
+    if (success) {
+      console.log("successful sacrifice");
+    } else {
+      console.log("failed sacrifice");
+    }
+
+  });
+}
+
+function showRankLegend(message) {
+  embeds.printUnitRanks(message);
 }
