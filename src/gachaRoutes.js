@@ -50,6 +50,9 @@ module.exports = function (message) {
     case "su":
       getUnit(message);
       break;
+    case "showuser":
+        getUser(message);
+      break;
     case "ae":
       addXp(message);
       break;
@@ -142,6 +145,14 @@ function getUnit(message) {
   .catch((err) => {console.error(err.stack);});
 }
 
+function getUser(message){
+  console.log("getUser");
+  user.getUser(message)
+  .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
+  .catch((err) => {console.error(err.stack);});
+}
+
+
 function addXp(message) {
   console.log("Add EXP");
   var unit_id = message.content.split(" ")[2];
@@ -155,6 +166,7 @@ function addXp(message) {
     }
   });
 }
+
 
 function sacUnit(message) {
   var indexTarg = message.content.split(" ")[2];
