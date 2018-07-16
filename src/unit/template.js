@@ -75,6 +75,45 @@ for (var i = 0; i < keys.length; i++) {
   return filteredUnits[filteredUnits.length * Math.random() << 0];
 }
 
+// so to get the % chance within a range, we total
+// the chance rates for each rank within range and use that
+// as total chance. the % chance is then currentchance/totalchance
+function getPullGroupChance(min, max, pg) {
+  var total_chance = 0;
+  if (pg >= min && pg <= max) {
+    for (var i = max; i >= min; i--) {
+      total_chance = Number(Number(total_chance) + Number(chanceRates.unit[i]));
+    }
+    console.log("Total chance: " + total_chance);
+    console.log("INDIV rare: " + pg + " with min " + min + " and max " + max + " is " + Number(chanceRates.unit[pg]/total_chance));
+    return Number(chanceRates.unit[pg]/total_chance);
+  }
+  return 0;
+}
+
+// follows similar logic to the pull rate shit go read that
+function getPullGroupChanceNum(min, max, pg) {
+  var val = 0;
+  for (var i = 1; i <= pg; i++) {
+    val += getPullGroupChance(min, max, i);
+  }
+  console.log("Pull rate for " + pg + " with min " + min + " and max " + max + " is " + val);
+  return val;
+}
+
+function pullOneByPullGroup(min,max,chars) {
+  var keys = Object.keys(chars);
+  var rng = Math.random();
+  for (var i = 1; i <= pullgroups.length; i++) {
+    if (rng < getPullGroupChanceNum(min,max,i)) {
+      console.log("Rolled a " + i + " pull group dude.");
+      return pickOne(i);
+    }
+  }
+   console.log("Impossibru. But we'll pretend it's a roll 1.");
+   return pickOne(chars);
+}
+
 // need to sum up the chance of the current rarity with the`
 // chances of the rarer rarities to get the actual
 // RNG number for rolling this rarity
@@ -246,9 +285,9 @@ const chanceRates = {
 }
 
 class char {
-  constructor(rateUps = [], ownerId) {
+  constructor(min_pg, max_pg, ownerId) {
     //Implement rate up chances somehow
-    var char = pullOne(chars);
+    var char = pullOneByPullGroup(min_pg,max_pg,chars);
 
     this.owner_id = ownerId;
     this.unit_name = char.name;
