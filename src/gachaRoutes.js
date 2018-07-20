@@ -10,6 +10,8 @@ var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
 var roster = require("./unit/unitroster");
 
+var unitFilters = require("./filter/unitFilters");
+
 
 module.exports = function (message) {
   msg = message.content.split(' ');
@@ -135,13 +137,18 @@ function rollOne(message) {
 
 function getChars(message) {
   console.log("GetChars");
-  var page = message.content.split(' ')[2] ? message.content.split(' ')[2] : 1;
+  var arguments = message.content.split(/\s+/);
+  
+  var arguments = arguments.slice(2);
+  var page = isNaN(arguments[0]) ? 1 : arguments[0];
+  var filters = unitFilters.parseIntoFilters(arguments);
+
   console.log(page);
   if (!page || page < 1) {
     embeds.printSingle(message, parseInt(colours.error), "Invalid page number!")
   } else {
-  inv.listUnits(message, page/*message.author.id,message.guild.member(message.author).displayName*/)
-    .catch((err) => {console.error(err);})
+  inv.listUnits(message, filters, page/*message.author.id,message.guild.member(message.author).displayName*/)
+    .catch((err) => {console.error(err.stack);})
   }
 }
 

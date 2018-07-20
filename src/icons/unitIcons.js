@@ -9,6 +9,18 @@ function getCombatIcon(type) {
     return "`✨`";
   }
 }
+function getIconCombatType(icon) {
+  if (icon == "`🏹`" || icon == "🏹") {
+    return  "ranged";
+  } else if (icon == "`🔪`" || icon == "🗡️" || icon == "🗡") {
+    return "melee";
+  } else if (icon == "`✨`" || icon == "✨"){
+    return "magic";
+  } else {
+    return undefined;
+  }
+}
+
 
 function getArmorIcon(type) {
   if (type == "light") {
@@ -17,6 +29,17 @@ function getArmorIcon(type) {
     return "🔸🔸";
   } else {
     return "🔸🔸🔸";
+  }
+}
+function getIconArmorType(icon) {
+  if (icon == "🔸🔸🔸") {
+    return "heavy";
+  } else if (icon == "🔸🔸") {
+    return "medium";
+  } else if (icon == "🔸") {
+    return "light";
+  } else {
+    return undefined;
   }
 }
 
@@ -38,9 +61,33 @@ function getRankIcon(rank) {
       return "⭐";
   }
 }
+function getIconRankType(icon) {
+  switch(icon) {
+    case "💜":
+      return 1;
+    case "💙":
+      return 2;
+    case "💚":
+      return 3;
+    case "💛":
+      return 4;
+    case "❤️":
+    case "❤":
+      return 5;
+    case "💗":
+      return 6;
+    case "⭐":
+      return 7;
+    default:
+      return undefined;
+  }
+}
 
 module.exports = {
   getCombatIcon : getCombatIcon,
+  getIconCombatType : getIconCombatType,
   getArmorIcon : getArmorIcon,
-  getRankIcon : getRankIcon
+  getIconArmorType : getIconArmorType,
+  getRankIcon : getRankIcon,
+  getIconRankType : getIconRankType
 }

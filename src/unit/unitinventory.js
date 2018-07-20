@@ -8,8 +8,8 @@ var dbGetUnitByUserIndex = require("../db/getUnits").dbGetUnitByUserIndex;
 var dbGetUnitByUserIndexMulti = require("../db/getUnits").dbGetUnitByUserIndexMulti
 var embeds = require("../messages/message");
 
-async function listUnits(message, page) {
-  return dbGetOwnedUnits(message.author.id)
+async function listUnits(message, filters, page) {
+  return dbGetOwnedUnits(message.author.id, filters)
 
     .then(function (units) {
       console.log("Num of units: " + units.length);

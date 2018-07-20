@@ -146,37 +146,37 @@ function getRank(name) {
 
 const baseStats = {
   "hp" : {
-    war : 1000,
-    necro : 1000,
-    rev : 700,
-    engi : 700,
+    warrior : 1000,
+    necromancer : 1000,
+    revenant : 700,
+    engineer : 700,
     ranger : 700,
     mesmer : 700,
-    guard : 500,
+    guardian : 500,
     thief : 500,
-    ele : 500
+    elementalist : 500
   },
   "spd" : {
-    war : 200,
-    necro : 200,
-    rev : 400,
-    engi : 200,
+    warrior : 200,
+    necromancer : 200,
+    revenant : 400,
+    engineer : 200,
     ranger : 300,
     mesmer : 500,
-    guard : 300,
+    guardian : 300,
     thief : 500,
-    ele : 200
+    elementalist : 200
   },
   "atk" : {
-    war : 250,
-    necro : 200,
-    rev : 200,
-    engi : 225,
+    warrior : 250,
+    necromancer : 200,
+    revenant : 200,
+    engineer : 225,
     ranger : 200,
     mesmer : 200,
-    guard : 250,
+    guardian : 250,
     thief : 300,
-    ele : 350
+    elementalist : 350
   },
   "def" : {
     heavy : 30,

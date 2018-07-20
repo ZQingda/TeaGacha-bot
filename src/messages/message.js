@@ -12,10 +12,8 @@ function unitsEmbed(msgEmbed, units, pageNum) {
     var curUnit = units[i];
     var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + getLvl(curUnit) + "** " + curUnit.class
       + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
-    if (i % 2 == 1) {
-      newEmbed.addBlankField(true);
-    }
-    newEmbed.addField(curUnit.inv_index + ". " + curUnit.unit_name, details + "\n---------------------------", true);
+      
+    newEmbed.addField(curUnit.inv_index + ". " + curUnit.unit_name, details + "\n---------------------------------------------", true);
   }
   return newEmbed;
 }

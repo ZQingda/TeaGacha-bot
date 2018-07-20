@@ -11,6 +11,8 @@ function dbGetRoster(userid) {
     console.log('Connected for roster retrieval.');
   });
 
+
+
   let sqlquery = "SELECT * FROM units WHERE owner_id = ? AND roster != -1;"
   let promise = new Promise(function(resolve, reject) {
     db.all(sqlquery, [userid], (err, rows) => {
@@ -43,7 +45,7 @@ function dbSetUnitRoster(userid, roster, unitid, rosterpos) {
 
 // gets all owned units of a specified user
 // returns: Promise (array of units)
-function dbGetOwnedUnits(userid) {
+function dbGetOwnedUnits(userid, filters) {
   var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
     if (err) {
       console.error(err.message);
@@ -51,10 +53,19 @@ function dbGetOwnedUnits(userid) {
     }
     console.log('Connected for char retrieval.');
   });
+  
+  sqlFilters = filters.getSQLWhere();
+  
+  let sqlquery = "SELECT * FROM units WHERE owner_id = ?";
+  let parms = [userid];
+  if(sqlFilters[0].length>0){
+    sqlquery+= " AND " + sqlFilters[0];
+    parms = parms.concat(sqlFilters[1]);
+  }
+  sqlquery += " ORDER BY inv_index ASC;";
 
-  let sqlquery = "SELECT * FROM units WHERE owner_id = ? ORDER BY rank DESC, lvl DESC;";
   let promise = new Promise(function(resolve, reject) {
-    db.all(sqlquery, [userid], (err, rows) => {
+    db.all(sqlquery, parms, (err, rows) => {
       if (err) {
         console.log(err);
       }
@@ -106,9 +117,7 @@ function dbGetUnitByIDMulti(ids) {
   });
 
   let sqlquery = "SELECT * FROM units WHERE ";
-  for (var i = 0; i < ids.length-1; i++) {
-    sqlquery += "unit_id = ? or ";
-  }
+  sqlquery += "unit_id = ? or ".repeat(ids.length-1);
   sqlquery += "unit_id = ?;";
   let promise = new Promise(function(resolve, reject) {
     db.all(sqlquery, ids, (err, rows) => {
@@ -178,9 +187,7 @@ function dbGetUnitByIndexMulti(userid, indexes) {
     console.log('Connected for char retrieval.');
   });
   let sqlquery = "SELECT * FROM units WHERE owner_id = ? AND (";
-  for (var i = 0; i < indexes.length-1; i++) {
-    sqlquery += "inv_index = ? or ";
-  }
+  sqlquery += "inv_index = ? or ".repeat(ids.length-1);
   sqlquery += "inv_index = ?);";
 
   var parms = [userid]
