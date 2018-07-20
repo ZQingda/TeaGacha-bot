@@ -10,7 +10,7 @@ var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
 var roster = require("./unit/unitroster");
 
-var unitFilters = require("./filter/unitFilters");
+var unitFilters = require("./filters/unitFilters");
 
 
 module.exports = function (message) {
