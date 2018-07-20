@@ -63,16 +63,14 @@ module.exports.printNewUnit = function (message, colour, unit) {
   var msg = {
     embed: {
       color: colour,
-      title: message.guild.member(message.author).displayName + " just got a new " + unit.unit_name,
-      description: '[============]\n'
-        + '**Rank:** ' + unit.rank + '\n'
-        + '**Armor:** ' + unit.armor_class + '\n'
-        + '**Combat:** ' + unit.combat_type + '\n'
+      title: message.guild.member(message.author).displayName + ": NEW " + unit.unit_name,
+      description: '**Rank:** ' + unit.rank + '\n'
+        + '**Armor:** ' + icons.getArmorIcon(unit.armor_class) + " " + unit.armor_class + '\n'
+        + '**Combat:** ' + icons.getCombatIcon(unit.combat_type) + " " + unit.combat_type + '\n'
         + '**Attack:** ' + unit.atk + '\n'
         + '**Defence:** ' + unit.def + '\n'
         + '**Speed:** ' + unit.spd + '\n'
         + '**Health:** ' + unit.hp + '\n\n'
-        + '[============]'
     }
   };
   message.channel.send(msg);

@@ -24,6 +24,15 @@ module.exports = function (message) {
     case "ro":
       rollOne(message);
       break;
+    case "rollBad":
+      rollOneShit(message);
+      break;
+    case "rollGood":
+      rollOneGood(message);
+      break;
+    case "roll5":
+      rollFive(message);
+      break;
     case "listunits":
     case "lu":
       getChars(message);
@@ -73,7 +82,7 @@ module.exports = function (message) {
     case "iconlegend":
       showRankLegend(message);
       break;
-    default:````````````````````````````````````````````````````````````````
+    default:
       console.log(msg);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
@@ -127,12 +136,62 @@ function register(message){
 
 function rollOne(message) {
   Promise
-  cur.modCurrency(message, 'clovers', -1)
+  cur.modCurrency(message, 'clovers', -5)
     .then((ret)=>{return units.genOne(message.author.id)})
     .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
     .catch((err) => {
       console.error('rollOne routes error : ' + err.stack);
     })
+}
+
+function rollOneShit(message) {
+  Promise
+  cur.modCurrency(message, 'clovers', -5)
+    .then((ret)=>{return units.genShit(message.author.id)})
+    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+    .catch((err) => {
+      console.error('rollOne routes error : ' + err.stack);
+    })
+}
+
+function rollOneGood(message) {
+  Promise
+  cur.modCurrency(message, 'clovers', -5)
+    .then((ret)=>{return units.genGood(message.author.id)})
+    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+    .catch((err) => {
+      console.error('rollOne routes error : ' + err.stack);
+    })
+}
+
+function rollFive(message) {
+  Promise
+  cur.modCurrency(message, 'clovers', -25)
+    .then((ret)=>{return units.genGood(message.author.id)})
+    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+    .catch((err) => {
+      console.error('rollOne routes error : ' + err.stack);
+    })
+      .then((ret)=>{return units.genOne(message.author.id)})
+      .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+      .catch((err) => {
+        console.error('rollOne routes error : ' + err.stack);
+      })
+        .then((ret)=>{return units.genOne(message.author.id)})
+        .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+        .catch((err) => {
+          console.error('rollOne routes error : ' + err.stack);
+        })
+          .then((ret)=>{return units.genOne(message.author.id)})
+          .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+          .catch((err) => {
+            console.error('rollOne routes error : ' + err.stack);
+          })
+            .then((ret)=>{return units.genOne(message.author.id)})
+            .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+            .catch((err) => {
+              console.error('rollOne routes error : ' + err.stack);
+            });
 }
 
 function getChars(message) {
@@ -210,7 +269,7 @@ function upgrUnit(message) {
   .then(function(target_id) {
     if (target_id) {
       embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
-      
+
       return inv.showUnitById(message, target_id);
     } else {
       embeds.printSingleError(message, "Target Id not Returned after Upgrade Unit");
