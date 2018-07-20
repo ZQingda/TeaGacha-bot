@@ -16,7 +16,7 @@ var columnSynonyms = [
       elementalist:["ele"],
       warrior:["war"],
       ranger:[],
-      mesmer:[],
+      mesmer:["mes"],
       guardian:["guard"],
       revenant:["rev"]
     }
