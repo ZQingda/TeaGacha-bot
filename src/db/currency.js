@@ -27,7 +27,7 @@ function getCurrencyAsync(userId, currency) {
       if (row) {
         resolve(row[currency] ? row[currency] : 0);
       } else {
-        reject("User doesn't exist");
+        reject("User isn't registered for Gacha!");
       }
     });
     db.close();

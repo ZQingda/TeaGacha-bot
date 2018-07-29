@@ -41,21 +41,21 @@ module.exports = function (message) {
     case "mc":
       modCurrencyWrap(message, 'clovers');
       break;
-    case "modflowers":
-    case "mf":
-      modCurrencyWrap(message, 'flower');
+    case "modgems":
+    case "mg":
+      modCurrencyWrap(message, 'gems');
       break;
     case "getclovers":
     case "gc":
       cur.getCurrency(message, 'clovers');
       break;
-    case "getflowers":
-    case "gf":
-      cur.getCurrency(message, 'flower');
+    case "getgems":
+    case "gg":
+      cur.getCurrency(message, 'gems');
       break;
     case "buyclovers":
     case "bc":
-      buyCurrency(message, 'flower', 'clovers', 100);
+      buyCurrency(message, 'gems', 'clovers', 100);
       break;
     case "showunit":
     case "su":
@@ -88,110 +88,158 @@ module.exports = function (message) {
   }
 }
 
+/**
+ * Promise rejection if the user is over their unit capacity or if the user doesn't exist.
+ * @param {*} message 
+ */
+function routeCheckOverUnitCapacity(message){
+  return user.getRemainingUnitCapacity(message.author.id)
+    .then(remainingCap =>{
+      if(remainingCap<0){
+        return Promise.reject("You are currently " + Math.abs(remainingCap) + " units over your capacity!  You need to reduce your unit count before using this comand.");
+      }else{
+        return Promise.resolve(remainingCap);
+      }
+    });
+}
+/**
+ * Promise rejection if the user doesn't exist.
+ * @param {*} message 
+ */
+function  routeCheckExists(message){
+  return user.exists(message.author.id)
+    .then(exists =>{
+      if(exists){
+        return Promise.resolve(true);
+      }else{
+        return Promise.reject("You are not registered for Gacha!");
+      }
+    });
+}
+
+
+function register(message){
+  user.exists(message.author.id)
+  .then(exists =>{
+    if(exists){
+      return embeds.printSingle(message, parseInt(colours.error), "You already have a Gacha account!");
+    }else{
+      return user.setupUser(message)
+        .then(function(){return inv.listUnits(message,1)})
+    }
+  })
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error( err.stack);
+  });
+}
+
 function showRoster(message) {
-  roster.listRoster(message)
-    .catch((err) => {
-      console.log("listRoster err " + err.stack);
-    })
+  routeCheckExists(message)
+  .then(function(){return roster.listRoster(message)})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.log("listRoster err " + err.stack);
+  });
 }
 
 function modCurrencyWrap(message, currency) {
-  cur.modCurrency(message, currency)
-    .catch((err) => {
-      console.error('routes error : ' + err);
-    });
+  routeCheckExists(message)
+  .then(function(){return cur.modCurrency(message, currency)})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('routes error : ' + err);
+  });
 }
 
 function buyCurrency(message, from, to, rate) {
   var amountTo = parseInt(message.content.split(' ')[2]);
   var amountFrom = amountTo * rate;
-  cur.modCurrency(message, from, (amountFrom * -1))
-    .then((params) => {
-      cur.modCurrency(message, to, amountTo)
-        .catch((err) => {
-          console.error('To conversion error : ' + err);
-        })
-    })
-    .catch((err) => {
-      console.error('From conversion error : ' + err);
-    })
-}
 
-function register(message){
-  user.getUser(message)
-    .then(u =>{
-      if(u.user_id==message.author.id){
-        return embeds.printSingle(message, parseInt(colours.error), "You already have a Gacha account!");
-      }
-      else{
-        return user.setupUser(message)
-        .then(function(){return inv.listUnits(message,1)})
-      }
+  if(isNaN(amountTo) || amountTo<=0){
+    embeds.printSingleError(message, "Please provide a positive amount of " + to + " you want.");
+  }else{
+    routeCheckExists(message)
+    .then(function(){
+      return cur.modCurrency(message, from, (amountFrom * -1))
+      .catch((err) => {
+        console.error('From conversion error : ' + err);
+        throw err;
+      })
+    })
+    .then(function(){
+      return cur.modCurrency(message, to, amountTo)
+      .catch((err) => {
+        console.error('To conversion error : ' + err);
+        throw err;
+      })
     })
     .catch((err) => {
-      console.error('Register error : ' + err.message);
-      console.error( err.stack);
+      embeds.printSingleError(message, err);
+      console.error('Buy currency error : ' + err + " - " + err.stack);
     });
+  }
 }
 
 function rollOne(message) {
-  Promise
-  cur.modCurrency(message, 'clovers', -5)
-    .then((ret)=>{return units.genOne(message.author.id)})
-    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-    .catch((err) => {
-      console.error('rollOne routes error : ' + err.stack);
-    })
+  routeCheckOverUnitCapacity(message)
+  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return units.genOne(message.author.id)})
+  .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('rollOne routes error : ' + err + " - " + err.stack);
+  });
 }
 
 function rollOneShit(message) {
-  Promise
-  cur.modCurrency(message, 'clovers', -5)
-    .then((ret)=>{return units.genShit(message.author.id)})
-    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-    .catch((err) => {
-      console.error('rollOne routes error : ' + err.stack);
-    })
+  routeCheckOverUnitCapacity(message)
+  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return units.genShit(message.author.id)})
+  .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('rollOneShit routes error : ' + err.stack);
+  });
 }
 
 function rollOneGood(message) {
-  Promise
-  cur.modCurrency(message, 'clovers', -5)
-    .then((ret)=>{return units.genGood(message.author.id)})
-    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-    .catch((err) => {
-      console.error('rollOne routes error : ' + err.stack);
-    })
+  routeCheckOverUnitCapacity(message)
+  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return units.genGood(message.author.id)})
+  .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('rollOneGood routes error : ' + err.stack);
+  });
 }
 
 function rollFive(message) {
-  Promise
-  cur.modCurrency(message, 'clovers', -25)
-    .then((ret)=>{return units.genGood(message.author.id)})
-    .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-    .catch((err) => {
-      console.error('rollOne routes error : ' + err.stack);
-    })
-      .then((ret)=>{return units.genOne(message.author.id)})
-      .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-      .catch((err) => {
-        console.error('rollOne routes error : ' + err.stack);
-      })
-        .then((ret)=>{return units.genOne(message.author.id)})
-        .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-        .catch((err) => {
-          console.error('rollOne routes error : ' + err.stack);
-        })
-          .then((ret)=>{return units.genOne(message.author.id)})
-          .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-          .catch((err) => {
-            console.error('rollOne routes error : ' + err.stack);
-          })
-            .then((ret)=>{return units.genOne(message.author.id)})
-            .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
-            .catch((err) => {
-              console.error('rollOne routes error : ' + err.stack);
-            });
+  routeCheckOverUnitCapacity(message)
+  .then(function(){return cur.modCurrency(message, 'clovers', -25);})
+  .then(function(){
+    var unitPromises =[];
+    //Generate 4 Random Units
+    for (var i = 0; i < 4; i++) {
+      unitPromises.push( units.genOne(message.author.id) );
+    }
+    //.then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
+    //Generate 1 Good Unit
+    unitPromises.push( units.genGood(message.author.id) );
+
+    return Promise.all(unitPromises);
+  })
+  //.then(function(){return inv.listUnits(message,1)})
+  .then((units)=>{
+    embeds.printUnitPage(message, parseInt(colours.normal), units, 1, 1);
+    //for(var i=0; i<units.length; i++){
+    //  embeds.printNewUnit(message, parseInt(colours.normal), units[i]);
+    //}
+  })
+  .catch((err)=>{
+    embeds.printSingleError(message, err);
+    console.error('rollFive routes error : ' + err.stack);
+  });
 }
 
 function getChars(message) {
@@ -206,23 +254,37 @@ function getChars(message) {
   if (!page || page < 1) {
     embeds.printSingle(message, parseInt(colours.error), "Invalid page number!")
   } else {
-  inv.listUnits(message, filters, page/*message.author.id,message.guild.member(message.author).displayName*/)
-    .catch((err) => {console.error(err.stack);})
+    routeCheckExists(message)
+    .then(function(){return inv.listUnits(message, page, filters);})
+    .catch((err) => {
+      embeds.printSingleError(message, err);
+      console.error('getChars routes error : ' + err.stack);
+    });
   }
 }
 
 function getUnit(message) {
   console.log("getUnit");
   var index = message.content.split(" ")[2];
-  inv.showUnit(message, index)
-  .catch((err) => {console.error(err.stack);});
+  
+  routeCheckExists(message)
+  .then(function(){return inv.showUnit(message, index);})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('getUnit routes error : ' + err.stack);
+  });
 }
 
 function getUser(message){
   console.log("getUser");
-  user.getUser(message)
-  .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
-  .catch((err) => {console.error(err.stack);});
+
+  routeCheckExists(message)
+  .then(function(){return user.getUser(message.author.id);})
+  .then((user)=>{embeds.printUser(message, parseInt(colours.normal), user);})
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('getUser routes error : ' + err.stack);
+  });
 }
 
 
@@ -230,13 +292,19 @@ function addXp(message) {
   console.log("Add EXP");
   var unit_id = message.content.split(" ")[2];
   var exp = message.content.split(" ")[3];
-  modU.addExp(unit_id,exp)
-  .then(function(success) {
+
+  routeCheckExists(message)
+  .then(function(){return modU.addExp(unit_id,exp);})
+  .then((success)=>{
     if (success) {
       message.channel.send("EXP added");
     } else {
       message.channel.send("EXP Add Failed.");
     }
+  })
+  .catch((err) => {
+    embeds.printSingleError(message, err);
+    console.error('addXp routes error : ' + err.stack);
   });
 }
 
@@ -245,17 +313,19 @@ function sacUnit(message) {
   var indexTarg = message.content.split(" ")[2];
   var indexSac = message.content.split(" ")[3];
   console.log("Feeding unit " + indexSac + " to " + indexTarg);
-  modU.feedUnit(message.author.id, indexTarg, indexSac)
-  .then(function(names) {
+
+  routeCheckExists(message)
+  .then(function(){return modU.feedUnit(message.author.id, indexTarg, indexSac);})
+  .then((names) => {
     if (names != false) {
       message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
       inv.showUnit(message, indexTarg);
     }
   })
   .catch((err) => {
-    embeds.printSingle(message, parseInt(colours.error), err)
-    console.error(err.stack);}
-  );
+    embeds.printSingleError(message, err);
+    console.error('sacUnit routes error : ' + err.stack);
+  });
 }
 
 function upgrUnit(message) {
@@ -265,18 +335,18 @@ function upgrUnit(message) {
   indexSac[1] = message.content.split(" ")[4];
   indexSac[2] = message.content.split(" ")[5];
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
-  modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2])
-  .then(function(target_id) {
+  routeCheckExists(message)
+  .then(function(){return modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2]);})
+  .then((target_id) => {
     if (target_id) {
       embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
-
       return inv.showUnitById(message, target_id);
     } else {
       embeds.printSingleError(message, "Target Id not Returned after Upgrade Unit");
       return false;
     }
   })
-  .then(function(success) {
+  .then((success) => {
     if (success) {
       console.log("successful sacrifice");
     } else {
@@ -285,8 +355,8 @@ function upgrUnit(message) {
   })
   .catch((err) => {
     embeds.printSingleError(message, err);
-    console.error(err.stack);}
-  );
+    console.error('upgrUnit routes error : ' + err.stack);
+  });
 }
 
 function showRankLegend(message) {

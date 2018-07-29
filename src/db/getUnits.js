@@ -53,12 +53,15 @@ function dbGetOwnedUnits(userid, filters) {
     }
     console.log('Connected for char retrieval.');
   });
+  let sqlFilters;
+  if(filters){
+    sqlFilters = filters.getSQLWhere? filters.getSQLWhere() : undefined;
+  }
   
-  sqlFilters = filters.getSQLWhere();
   
   let sqlquery = "SELECT * FROM units WHERE owner_id = ?";
   let parms = [userid];
-  if(sqlFilters[0].length>0){
+  if(sqlFilters && sqlFilters[0].length>0){
     sqlquery+= " AND " + sqlFilters[0];
     parms = parms.concat(sqlFilters[1]);
   }

@@ -6,7 +6,7 @@ const config = require('../config.json');
 function dbGetUserById(userid) {
   let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {if (err) {reject(err);}});
 
-  let sqlquery = "SELECT * FROM users WHERE user_id = ?";
+  let sqlquery = "SELECT users.*, count(units.unit_id) AS unit_count FROM users LEFT JOIN units ON units.owner_id=users.user_id WHERE user_id = ? GROUP BY users.user_id"
   let promise = new Promise(function(resolve, reject) {
     db.get(sqlquery, [userid], (err, row) => {
       if (err) {
@@ -16,8 +16,7 @@ function dbGetUserById(userid) {
         console.log("Found user.");
         resolve(row);
       } else {
-        console.log("User doesn't exist with that Id.");
-        resolve(null);
+        reject("User isn't registered for Gacha!");
       }
     });
     db.close();

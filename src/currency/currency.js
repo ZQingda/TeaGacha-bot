@@ -11,7 +11,6 @@ module.exports.modCurrency = function (message, currency, cost) {
   return dbCurrency.getCurrencyAsync(userId, currency)
     .then((curAmount) => {
       if ((curAmount + modValue) < 0) {
-        embeds.printSingle(message, parseInt(colours.error), "You don't have enough " + currency + "!");
         return Promise.reject("Not enough " + currency);
       }
       var setValue = curAmount + modValue;
@@ -21,11 +20,7 @@ module.exports.modCurrency = function (message, currency, cost) {
     .then((curValue) => {
       embeds.printCurrency(message, parseInt(colours.normal), currency, curValue);
       return Promise.resolve({ status: "success", curValue: curValue })
-    })
-    .catch((err) => {
-      console.error('[!] modCurrency() : ' + err);
-      return Promise.reject("modCurrency errored");
-    })
+    });
 }
 
 module.exports.getCurrency = function (message, currency) {
@@ -36,5 +31,6 @@ module.exports.getCurrency = function (message, currency) {
     })
     .catch((err) => {
       console.error('[!] getCurrency() : ' + err);
+      embeds.printSingleError(message, err);
     })
 }

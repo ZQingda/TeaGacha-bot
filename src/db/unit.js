@@ -21,8 +21,9 @@ function insertUnit(unit) {
       unit.specialization,
       -1
     ];
-    db.run(sqlInsertUnit, parms, (err) => {
+    db.run(sqlInsertUnit, parms, function(err){
       if (err) {reject (err);}
+      //this.lastID
       resolve(unit);
     });
     db.close();

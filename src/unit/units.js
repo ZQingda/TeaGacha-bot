@@ -13,7 +13,7 @@ function genShit(userId){
 }
 
 function genGood(userId){
-  let c = new char(1, 3, userId);
+  let c = new char(3, 4, userId);
   return dbUnit.insertUnit(c);
 }
 

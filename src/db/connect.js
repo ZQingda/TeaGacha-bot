@@ -14,10 +14,11 @@ module.exports.initDB = function (db) {
   var userCreate = 'CREATE TABLE IF NOT EXISTS users (';
   userCreate += 'user_id INTEGER PRIMARY KEY NOT NULL,';
   userCreate += 'username TEXT UNIQUE,';
-  userCreate += 'flower INTEGER,';
-  userCreate += 'clovers INTEGER,';
+  userCreate += 'gems  INTEGER NOT NULL DEFAULT 0,';
+  userCreate += 'clovers INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'energy	INTEGER NOT NULL DEFAULT 0,';
-  userCreate += 'energy_max	INTEGER NOT NULL DEFAULT 0';
+  userCreate += 'energy_max	INTEGER NOT NULL DEFAULT 0,';
+  userCreate += 'unit_capacity	INTEGER NOT NULL DEFAULT 0';
   userCreate += ');';
 
   var unitCreate = 'CREATE TABLE IF NOT EXISTS units (';

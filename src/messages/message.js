@@ -42,9 +42,10 @@ module.exports.printUser = function (message, colour, user) {
   let msg = new Discord.RichEmbed();
   msg.setColor(colour);
   msg.setTitle("**__" + message.guild.member(message.author).displayName + "__**");
-  msg.addField('Flowers', user.flower, false);
   msg.addField('Clovers', user.clovers, false);
+  msg.addField('Gems', user.gems, false);
   msg.addField('Energy', user.energy + "/" + user.energy_max, false);
+  msg.addField('Units', user.unit_count + "/" + user.unit_capacity, false);
   message.channel.send(msg);
 }
 module.exports.printUnit = function(message, colour, unit){
