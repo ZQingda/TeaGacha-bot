@@ -19,7 +19,7 @@ async function listUnits(message, page, filters) {
         embeds.printSingle(message, parseInt(colours.error), "You only have " + pages + " pages of units!")
       }
       else {
-        embeds.printUnitPage(message, parseInt(colours.normal), units, page, pages);
+        embeds.printUnitPage(message, parseInt(colours.normal), units, page, pages, false);
       }
     })
     .catch((err) => {console.error(err);})

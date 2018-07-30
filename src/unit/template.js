@@ -183,6 +183,18 @@ function getRank(name) {
   }
 }
 
+const rankInfo = {
+  "name" : {
+    1 : "Exclusive",
+    2 : "Ultra Rare",
+    3 : "Rare",
+    4 : "Uncommon",
+    5 : "Common",
+    6 : "Very Common",
+    7 : "Mule"
+  }
+}
+
 const baseStats = {
   "hp" : {
     warrior : 1000,
@@ -327,5 +339,6 @@ module.exports = {
   getHP : getHP,
   getSPD : getSPD,
   char : char,
-  getRankCount : getRankCount
+  getRankCount : getRankCount,
+  rankInfo : rankInfo
 }

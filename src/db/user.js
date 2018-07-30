@@ -5,7 +5,7 @@ function insertUser(user) {
   return new Promise(function(resolve, reject) {
     let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
     let sqlInsertUser = 'INSERT INTO users (user_id, gems, clovers, energy, energy_max, unit_capacity) VALUES( ?, ?, ?, ?, ?, ?)';
-    
+
     db.run(sqlInsertUser, [user.user_id, user.gems, user.clovers, user.energy, user.energy_max, user.unit_capacity], (err) => {
       if (err) {reject (err);}
       resolve(user);
@@ -29,7 +29,23 @@ function modUnitCapacity(userId, unit_capacity){
   });
 }
 
+function modWeeklyConversions(userId, amount){
+  let sqlquery = "UPDATE users SET weeklyconversions = ? where user_id = ?;"
+  let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READWRITE, (err) => {if (err) {reject(err);}});
+  return new Promise(function(resolve, reject) {
+    db.run(sqlquery, [amount, userId], (err) => {
+      if (err) {
+        reject(err);
+      }else{
+        resolve(true);
+      }
+    });
+    db.close();
+  });
+}
+
 module.exports = {
   insertUser : insertUser,
-  modUnitCapacity: modUnitCapacity
+  modUnitCapacity: modUnitCapacity,
+  modWeeklyConversions: modWeeklyConversions
 }

@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 var colours = require('./config').colours;
 var cur = require("./currency/currency");
+var databcurr = require("./db/currency");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
 const config = require('./config');
@@ -9,8 +10,9 @@ var inv = require("./unit/unitinventory");
 var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
 var roster = require("./unit/unitroster");
-
+var iconscurr = require("./icons/currencyIcons");
 var unitFilters = require("./filters/unitFilters");
+var conv = require("./currency/weeklyconversions");
 
 
 module.exports = function (message) {
@@ -55,7 +57,7 @@ module.exports = function (message) {
       break;
     case "buyclovers":
     case "bc":
-      buyCurrency(message, 'gems', 'clovers', 100);
+      buyCurrency(message, 'flowers', 'gems', 5);
       break;
     case "showunit":
     case "su":
@@ -90,7 +92,7 @@ module.exports = function (message) {
 
 /**
  * Promise rejection if the user is over their unit capacity or if the user doesn't exist.
- * @param {*} message 
+ * @param {*} message
  */
 function routeCheckOverUnitCapacity(message){
   return user.getRemainingUnitCapacity(message.author.id)
@@ -104,7 +106,7 @@ function routeCheckOverUnitCapacity(message){
 }
 /**
  * Promise rejection if the user doesn't exist.
- * @param {*} message 
+ * @param {*} message
  */
 function  routeCheckExists(message){
   return user.exists(message.author.id)
@@ -156,29 +158,67 @@ function buyCurrency(message, from, to, rate) {
   var amountTo = parseInt(message.content.split(' ')[2]);
   var amountFrom = amountTo * rate;
 
-  if(isNaN(amountTo) || amountTo<=0){
-    embeds.printSingleError(message, "Please provide a positive amount of " + to + " you want.");
-  }else{
-    routeCheckExists(message)
-    .then(function(){
-      return cur.modCurrency(message, from, (amountFrom * -1))
-      .catch((err) => {
-        console.error('From conversion error : ' + err);
-        throw err;
-      })
-    })
-    .then(function(){
-      return cur.modCurrency(message, to, amountTo)
-      .catch((err) => {
-        console.error('To conversion error : ' + err);
-        throw err;
-      })
-    })
-    .catch((err) => {
-      embeds.printSingleError(message, err);
-      console.error('Buy currency error : ' + err + " - " + err.stack);
+  let canConvert = conv.getWeeklyConversions(message.author.id)
+    .then(function(result) {
+      if (result >= conv.maxPerWeek) {
+        embeds.printSingleError(message, "Hit max conversions (" + conv.maxPerWeek + ") for the week.");
+      } else if (isNaN(amountTo) || amountTo<=0) {
+        embeds.printSingleError(message, "Please provide a positive number of " + iconscurr.getCurrencyIcon(to) + " you want.");
+      } else {
+        if(result + amountTo > conv.maxPerWeek){
+          embeds.printSingleError(message, "You will go over your weekly conversions (" + conv.maxPerWeek +").");
+        } else {
+          routeCheckExists(message)
+          .then(function() {
+            return databcurr.getFlowers(message.author.id)
+            .catch((err) => {
+              console.error('From conversion error : ' + err);
+              throw err;
+            })
+          })
+          .then(function(flowers){
+            console.log("Flowers: " + flowers)
+            if ((flowers - amountFrom) < 0) {
+              embeds.printSingleError(message, "You need " + amountFrom + " " + iconscurr.getCurrencyIcon("flowers"));
+              return 0;
+            } else {
+              console.log("Starting Flower Stealing...")
+              return databcurr.modifyFlowers(message.author.id, flowers, (amountFrom * -1))
+              .catch((err) => {
+                console.error('From conversion error : ' + err);
+                throw err;
+              })
+            }
+          })
+          .then(function(result){
+            console.log("Result: " + result);
+            if (result) {
+              console.log("Converting to Gems attempt..");
+              return cur.modCurrency(message, to, amountTo)
+              .catch((err) => {
+                console.error('To conversion error : ' + err);
+                throw err;
+              })
+            } else {
+              return 0;
+            }
+          })
+          .catch((err) => {
+            embeds.printSingleError(message, err);
+            console.error('Buy currency error : ' + err + " - " + err.stack);
+          })
+          .then(function(result) {
+            if (result) {
+              embeds.printSingleNormal(message, "You traded " + amountFrom + " " + iconscurr.getCurrencyIcon(from)
+                + " for " + amountTo + " " + iconscurr.getCurrencyIcon(to) + ".");
+              return conv.addWeeklyConversion(message.author.id,amountTo);
+            } else {
+              return 0;
+            }
+          });
+        }
+      }
     });
-  }
 }
 
 function rollOne(message) {
@@ -231,7 +271,7 @@ function rollFive(message) {
   })
   //.then(function(){return inv.listUnits(message,1)})
   .then((units)=>{
-    embeds.printUnitPage(message, parseInt(colours.normal), units, 1, 1);
+    embeds.printUnitPage(message, parseInt(colours.normal), units, 1, 1, true);
     //for(var i=0; i<units.length; i++){
     //  embeds.printNewUnit(message, parseInt(colours.normal), units[i]);
     //}
@@ -245,7 +285,7 @@ function rollFive(message) {
 function getChars(message) {
   console.log("GetChars");
   var arguments = message.content.split(/\s+/);
-  
+
   var arguments = arguments.slice(2);
   var page = isNaN(arguments[0]) ? 1 : arguments[0];
   var filters = unitFilters.parseIntoFilters(arguments);
@@ -266,7 +306,7 @@ function getChars(message) {
 function getUnit(message) {
   console.log("getUnit");
   var index = message.content.split(" ")[2];
-  
+
   routeCheckExists(message)
   .then(function(){return inv.showUnit(message, index);})
   .catch((err) => {

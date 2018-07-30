@@ -1,19 +1,34 @@
 var pad = require('pad-left');
 var icons = require("../icons/unitIcons");
+var iconscurr = require("../icons/currencyIcons");
 var config = require("../config");
 var getLvl = require("../unit/template").getLvl;
 var templ = require("../unit/template");
+var cat = require("../unit/catalogue").characters;
+var conv = require("../currency/weeklyconversions");
 
 const Discord = require("discord.js");
 
 function unitsEmbed(msgEmbed, units, pageNum) {
-  var newEmbed = msgEmbed
+  var newEmbed = msgEmbed;
   for (var i = 0; i < units.length; i++) {
     var curUnit = units[i];
     var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + getLvl(curUnit) + "** " + curUnit.class
       + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
-      
+
     newEmbed.addField(curUnit.inv_index + ". " + curUnit.unit_name, details + "\n---------------------------------------------", true);
+  }
+  return newEmbed;
+}
+
+function newUnitsEmbed(msgEmbed, units, pageNum) {
+  var newEmbed = msgEmbed;
+  for (var i = 0; i < units.length; i++) {
+    var curUnit = units[i];
+    var details = icons.getRankIcon(curUnit.rank) + " - Rarity: " + templ.rankInfo.name[cat[curUnit.name].pull_group]+ "\n**Lv "
+      + getLvl(curUnit) + "** " + curUnit.class + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
+
+    newEmbed.addField(curUnit.unit_name, details + "\n---------------------------------------------", true);
   }
   return newEmbed;
 }
@@ -38,6 +53,16 @@ module.exports.printSingleError = function (message, text) {
   message.channel.send(msg);
 }
 
+module.exports.printSingleNormal = function (message, text) {
+  var msg = {
+    embed: {
+      color: parseInt(config.colours.normal),
+      description: text
+    }
+  }
+  message.channel.send(msg);
+}
+
 module.exports.printUser = function (message, colour, user) {
   let msg = new Discord.RichEmbed();
   msg.setColor(colour);
@@ -52,12 +77,16 @@ module.exports.printUnit = function(message, colour, unit){
   console.log("**ATK** " + unit.atk + " / **DEF** " + unit.def + " / **HP** " + unit.hp + " / **SPD** " + unit.spd);
   let msg = new Discord.RichEmbed();
   msg.setColor(colour);
-  msg.setTitle(icons.getRankIcon(unit.rank) + " " + unit.unit_name);
+  msg.setTitle("__" + unit.unit_name + "__");
+  msg.addField("Current Rank", icons.getRankIcon(unit.rank) + " " + unit.rank, true);
+  msg.addField("Max Rank", icons.getRankIcon(cat[unit.unit_name].max_rank) + " " + cat[unit.unit_name].max_rank, true);
+  msg.addField("Rarity", templ.rankInfo.name[cat[unit.unit_name].pull_group], true);
   var expLeft = ((unit.lvl - getLvl(unit))*100).toFixed(2);
   msg.addField("Level","**" + getLvl(unit) + "** / EXP: " + expLeft + "%",true);
   msg.addField("Types",icons.getCombatIcon(unit.combat_type) + "  " + icons.getArmorIcon(unit.armor_class),true);
   msg.addField("Class", unit.class, true)
   msg.addField("Stats", "**ATK** " + unit.atk + " / **DEF** " + unit.def + " / **HP** " + unit.hp + " / **SPD** " + unit.spd);
+  msg.addField("Character of", cat[unit.unit_name].owner);
   message.channel.send(msg);
 }
 module.exports.printNewUnit = function (message, colour, unit) {
@@ -65,7 +94,9 @@ module.exports.printNewUnit = function (message, colour, unit) {
     embed: {
       color: colour,
       title: message.guild.member(message.author).displayName + ": NEW " + unit.unit_name,
-      description: '**Rank:** ' + unit.rank + '\n'
+      description: '**Rank:** ' + icons.getRankIcon(unit.rank) + ' ' + unit.rank + ' / **Max Rank:** '
+        +  icons.getRankIcon(cat[unit.unit_name].max_rank) + ' ' + cat[unit.unit_name].max_rank + '\n'
+        + '**Rarity:** ' + templ.rankInfo.name[cat[unit.unit_name].pull_group] + '\n'
         + '**Armor:** ' + icons.getArmorIcon(unit.armor_class) + " " + unit.armor_class + '\n'
         + '**Combat:** ' + icons.getCombatIcon(unit.combat_type) + " " + unit.combat_type + '\n'
         + '**Attack:** ' + unit.atk + '\n'
@@ -81,7 +112,7 @@ module.exports.printCurrency = function (message, colour, currency, curValue) {
   var msg = {
     embed: {
       color: colour,
-      description: message.author.username + ' has ' + curValue + ' ' + currency
+      description: message.author.username + ' has ' + curValue + ' ' + iconscurr.getCurrencyIcon(currency)
     }
   }
   message.channel.send(msg);
@@ -114,7 +145,7 @@ module.exports.printRoster = async function (message, colour, units) {
   message.channel.send(msgEmbed);
 }
 
-module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
+module.exports.printUnitPage = async function (message, colour, units, p1, p2, newunits) {
   var curPage = parseInt(p1);
   var maxPage = p2;
   var pl = config.pageLength;
@@ -122,8 +153,15 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
   var pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
   var msgEmbed = new Discord.RichEmbed();
   msgEmbed.setColor(colour);
+  if (newunits) {
+    msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s New Units, page " + curPage + " of " + maxPage + "__**");
+  }
   msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
-  msgEmbed = unitsEmbed(msgEmbed, pageUnits, curPage);
+  if (newunits) {
+    msgEmbed = newUnitsEmbed(msgEmbed, pageUnits, curPage);
+  } else {
+    msgEmbed = unitsEmbed(msgEmbed, pageUnits, curPage);
+  }
 
   var filterPrev = (reaction, user) => { return (reaction.emoji.name === '◀' && user.id === message.author.id) };
   var filterNext = (reaction, user) => { return (reaction.emoji.name === '▶' && user.id === message.author.id) };
@@ -145,9 +183,16 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
       }
       var newMsg = new Discord.RichEmbed();
       newMsg.setColor(colour);
+      if (newunits) {
+        msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s New Units, page " + curPage + " of " + maxPage + "__**");
+      }
       newMsg.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
       pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
-      newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      if (newunits) {
+        newMsg = newUnitsEmbed(newMsg, pageUnits, curPage);
+      } else {
+        newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      }
       response.edit(newMsg);
     });
     const collectNext = response.createReactionCollector(filterNext, { time: 15000 });
@@ -159,9 +204,16 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2) {
       }
       var newMsg = new Discord.RichEmbed();
       newMsg.setColor(colour);
+      if (newunits) {
+        msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s New Units, page " + curPage + " of " + maxPage + "__**");
+      }
       newMsg.setTitle("**__" + message.guild.member(message.author).displayName + "'s Units, page " + curPage + " of " + maxPage + "__**");
       pageUnits = units.slice((pl * (curPage - 1)), (pl * curPage));
-      newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      if (newunits) {
+        newMsg = newUnitsEmbed(newMsg, pageUnits, curPage);
+      } else {
+        newMsg = unitsEmbed(newMsg, pageUnits, curPage);
+      }
       response.edit(newMsg)
     });
   }
@@ -172,5 +224,5 @@ module.exports.printUnitRanks = function (message) {
   for (var i = templ.getRankCount(); i > 0; i--) {
     legend += icons.getRankIcon(i) + "\n";
   }
-  module.exports.printSingle(message, parseInt(config.colours.normal), legend);
+  printSingle(message, parseInt(config.colours.normal), legend);
 }

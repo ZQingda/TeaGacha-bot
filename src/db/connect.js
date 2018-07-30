@@ -18,7 +18,8 @@ module.exports.initDB = function (db) {
   userCreate += 'clovers INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'energy	INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'energy_max	INTEGER NOT NULL DEFAULT 0,';
-  userCreate += 'unit_capacity	INTEGER NOT NULL DEFAULT 0';
+  userCreate += 'unit_capacity	INTEGER NOT NULL DEFAULT 0,';
+  userCreate += 'weeklyconversions INTEGER';
   userCreate += ');';
 
   var unitCreate = 'CREATE TABLE IF NOT EXISTS units (';
@@ -112,8 +113,8 @@ module.exports.initDB = function (db) {
     db.run(triggercreate_unitDelete);
   });
 
-  
-  
+
+
   console.log("user/units created");
 }
 

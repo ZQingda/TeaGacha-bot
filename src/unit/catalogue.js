@@ -18,7 +18,7 @@ module.exports.characters = {
     pull_group: 3 //ext
   },
   "Condi Scourge Shisk" : {
-    name: "Shisk",
+    name: "Condi Scourge Shisk",
     owner : "Triask.4189",
     armor : "light",
     combat : "magic",
@@ -33,7 +33,7 @@ module.exports.characters = {
     pull_group: 1 //ext
   },
   "Power Reaper Shisk" : {
-    name: "Shisk",
+    name: "Power Reaper Shisk",
     owner : "Triask.4189",
     armor : "light",
     combat : "melee",
@@ -344,7 +344,7 @@ module.exports.characters = {
     max_rank: 4,
     hp_modifier: 0.9,
     spd_modifier: 1.0,
-    atk_modifier: 1.3,
+    atk_modifier: 1.25,
     def_modifier: 0.9,
     pull_group: 6 //ext
   },
@@ -357,7 +357,7 @@ module.exports.characters = {
     specialization : "none",
     min_rank: 1,
     max_rank: 4,
-    hp_modifier: 1.0,
+    hp_modifier: 0.95,
     spd_modifier: 1.0,
     atk_modifier: 1.1,
     def_modifier: 1.0,
@@ -409,7 +409,7 @@ module.exports.characters = {
     pull_group: 3 //ext
   },
   "La Pestables" : {
-    name: "Sylvia Aria",
+    name: "La Pestables",
     owner : "Anzy.9237",
     armor : "medium",
     combat : "melee",
@@ -665,7 +665,7 @@ module.exports.characters = {
     pull_group: 4 //ext
   },
   "Combo Maker" : {
-    name: "Ninja As guardian",
+    name: "Combo Maker",
     owner : "IMA NINJA.4061",
     armor : "light",
     combat : "melee",
@@ -770,7 +770,7 @@ module.exports.characters = {
     pull_group: 3 //ext
   },
   "Hemu W" : {
-    name: "Hemuhemu",
+    name: "Hemu W",
     owner : "nintama.9436",
     armor : "heavy",
     combat : "melee",
@@ -1055,7 +1055,7 @@ module.exports.characters = {
     pull_group: 5 //ext
   },
   "Paladin Blues" : {
-    name: "Aetherize",
+    name: "Paladin Blues",
     owner : "xBlues.6581",
     armor : "heavy",
     combat : "ranged",
