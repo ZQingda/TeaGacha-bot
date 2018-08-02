@@ -44,8 +44,24 @@ function modWeeklyConversions(userId, amount){
   });
 }
 
+function modAllWeeklyConversions(amount){
+  let sqlquery = "UPDATE users SET weeklyconversions = ?;"
+  let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READWRITE, (err) => {if (err) {reject(err);}});
+  return new Promise(function(resolve, reject) {
+    db.run(sqlquery, [amount], (err) => {
+      if (err) {
+        reject(err);
+      }else{
+        resolve(true);
+      }
+    });
+    db.close();
+  });
+}
+
 module.exports = {
   insertUser : insertUser,
   modUnitCapacity: modUnitCapacity,
-  modWeeklyConversions: modWeeklyConversions
+  modWeeklyConversions: modWeeklyConversions,
+  modAllWeeklyConversions: modAllWeeklyConversions
 }
