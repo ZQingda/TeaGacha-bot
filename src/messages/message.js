@@ -50,7 +50,7 @@ module.exports.printSingleError = function (message, text) {
       description: text
     }
   }
-  message.channel.send(msg);
+  return message.channel.send(msg);
 }
 
 module.exports.printSingleNormal = function (message, text) {
@@ -60,7 +60,17 @@ module.exports.printSingleNormal = function (message, text) {
       description: text
     }
   }
-  message.channel.send(msg);
+  return message.channel.send(msg);
+}
+
+module.exports.printSingleConfirmation = function (message, text) {
+  var msg = {
+    embed: {
+      color: parseInt(config.colours.confirm),
+      description: text
+    }
+  }
+  return message.channel.send(msg);
 }
 
 module.exports.printUser = function (message, colour, user) {
@@ -145,7 +155,7 @@ module.exports.printRoster = async function (message, colour, units) {
   message.channel.send(msgEmbed);
 }
 
-module.exports.printUnitPage = async function (message, colour, units, p1, p2, newunits) {
+module.exports.printUnitPage = async function (message, colour, units, p1, p2, newunits) { //TODO: clear reactions on timer end
   var curPage = parseInt(p1);
   var maxPage = p2;
   var pl = config.pageLength;
@@ -216,6 +226,31 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2, n
       }
       response.edit(newMsg)
     });
+  }
+}
+
+module.exports.confirmationMessageYN = async function (message, text) {
+  const yes = "✅";
+  const no = "❎";
+  //var msgEmbed = new Discord.RichEmbed();
+  //message.channel.send("Are you sure?\n:white_check_mark: for yes, :negative_squared_cross_mark: for no");
+  var response = await module.exports.printSingleConfirmation(message, text + "\n\n:white_check_mark: for yes, :negative_squared_cross_mark: for no");
+
+  var filterReact = (reaction, user) => { return ((reaction.emoji.name === '✅' || reaction.emoji.name === '❎') && user.id === message.author.id) };
+
+  await response.react(yes);
+  await response.react(no);
+
+  const reactions = await response.awaitReactions(filterReact, { max: 1, time: 7000 });
+  response.delete();
+
+  if (reactions.has(yes) && reactions.get(yes).count >= 1) {
+    return true;
+  } else if (reactions.has(no) && reactions.get(no).count >= 1) {
+    return false;
+  } else {
+    var errResponse = await module.exports.printSingleError(message, "No response was received. Cancelling action.");
+    errResponse.delete(5000);
   }
 }
 

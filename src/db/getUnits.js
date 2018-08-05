@@ -57,8 +57,8 @@ function dbGetOwnedUnits(userid, filters) {
   if(filters){
     sqlFilters = filters.getSQLWhere? filters.getSQLWhere() : undefined;
   }
-  
-  
+
+
   let sqlquery = "SELECT * FROM units WHERE owner_id = ?";
   let parms = [userid];
   if(sqlFilters && sqlFilters[0].length>0){
@@ -190,7 +190,7 @@ function dbGetUnitByIndexMulti(userid, indexes) {
     console.log('Connected for char retrieval.');
   });
   let sqlquery = "SELECT * FROM units WHERE owner_id = ? AND (";
-  sqlquery += "inv_index = ? or ".repeat(ids.length-1);
+  sqlquery += "inv_index = ? or ".repeat(indexes.length-1);
   sqlquery += "inv_index = ?);";
 
   var parms = [userid]

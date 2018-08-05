@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 var colours = require('./config').colours;
 var cur = require("./currency/currency");
 var databcurr = require("./db/currency");
+var databunit = require("./db/getUnits");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
 const config = require('./config');
@@ -11,6 +12,7 @@ var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
 var roster = require("./unit/unitroster");
 var iconscurr = require("./icons/currencyIcons");
+var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
 
@@ -368,13 +370,60 @@ function sacUnit(message) {
   var indexTarg = message.content.split(" ")[2];
   var indexSac = message.content.split(" ")[3];
   console.log("Feeding unit " + indexSac + " to " + indexTarg);
+  var targID;
 
   user.getUser(message.author.id)
-  .then(function(){return modU.feedUnit(message.author.id, indexTarg, indexSac);})
+  .then(function (usr) {
+    if (usr.user_id) {
+      console.log("found usr");
+      console.log("unit count: " + usr.unit_count);
+      if ((indexTarg > 0 && indexTarg <= usr.unit_count) && (indexSac > 0 && indexSac <= usr.unit_count)) {
+        return databunit.dbGetUnitByIndexMulti(message.author.id, [indexSac, indexTarg]);
+      }
+    } else { return false; }
+  })
+  .then(function(units) {
+    console.log(units);
+    if (units) {
+      var sac;
+      var targ;
+      if (units[0].inv_index == indexSac) {
+        console.log("sac is" + units[0].inv_index);
+        sac = units[0];
+        targ = units[1];
+        return [sac, targ];
+      } else {
+        sac = units[1];
+        targ = units[0];
+        return [sac, targ];
+      }
+    }
+  })
+  .then(function(units) {
+    var sac = units[0];
+    var targ = units[1];
+    targID = targ.unit_id;
+    console.log("sac is " + sac.inv_index);
+    console.log("targ is" + targ.inv_index);
+    return embeds.confirmationMessageYN(message, "Are you sure you want to use " +
+    "Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + " to upgrade " +
+    "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?");
+  })
+  .then(function(result){
+    console.log(result);
+    if (result) {
+      return modU.feedUnit(message.author.id, indexTarg, indexSac);
+    } else {
+      return false;
+    }
+  })
   .then((names) => {
     if (names != false) {
       message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
-      inv.showUnit(message, indexTarg);
+      console.log("id: " + targID);
+      inv.showUnitById(message, targID);
+    } else {
+      return false;
     }
   })
   .catch((err) => {
@@ -391,7 +440,16 @@ function upgrUnit(message) {
   indexSac[2] = message.content.split(" ")[5];
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
   user.getUser(message.author.id)
-  .then(function(){return modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2]);})
+  .then(function() {
+    return embeds.confirmationMessage(message);
+  })
+  .then(function(result){
+    if (result) {
+      return modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2]);
+    } else {
+      return false;
+    }
+  })
   .then((target_id) => {
     if (target_id) {
       embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
