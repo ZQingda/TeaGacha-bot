@@ -59,6 +59,9 @@ module.exports = function (message) {
     case "bc":
       buyCurrency(message, 'flowers', 'gems', 5);
       break;
+    case "sellunit":
+      sellUnit(message, 'clovers');
+      break;
     case "showunit":
     case "su":
       getUnit(message);
@@ -89,34 +92,32 @@ module.exports = function (message) {
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
 }
+/**
+ * Returns all the arguments (space delimited) passed into the message (excluding the 1st which splits the gacha route)
+ * Ex: message "gacha showunit 1" will return [1]
+ * @param {*} message 
+ */
+function getArgs(message){
+  let args = message.content.split(/\s+/);
+  args = args.slice(2);
+  return args;
+}
+
 
 /**
  * Promise rejection if the user is over their unit capacity or if the user doesn't exist.
  * @param {*} message
  */
 function routeCheckOverUnitCapacity(message){
-  return user.getRemainingUnitCapacity(message.author.id)
-    .then(remainingCap =>{
-      if(remainingCap<0){
-        return Promise.reject("You are currently " + Math.abs(remainingCap) + " units over your capacity!  You need to reduce your unit count before using this comand.");
-      }else{
-        return Promise.resolve(remainingCap);
-      }
-    });
-}
-/**
- * Promise rejection if the user doesn't exist.
- * @param {*} message
- */
-function  routeCheckExists(message){
-  return user.exists(message.author.id)
-    .then(exists =>{
-      if(exists){
-        return Promise.resolve(true);
-      }else{
-        return Promise.reject("You are not registered for Gacha!");
-      }
-    });
+  return user.getUser(message.author.id)
+  .then(user => {
+    let remainingCap = user.unit_capacity - user.unit_count;
+    if(remainingCap<0){
+      return Promise.reject("You are currently " + Math.abs(remainingCap) + " units over your capacity!  You need to reduce your unit count before using this comand.");
+    }else{
+      return Promise.resolve(remainingCap);
+    }
+  })
 }
 
 
@@ -137,7 +138,7 @@ function register(message){
 }
 
 function showRoster(message) {
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return roster.listRoster(message)})
   .catch((err) => {
     embeds.printSingleError(message, err);
@@ -146,7 +147,7 @@ function showRoster(message) {
 }
 
 function modCurrencyWrap(message, currency) {
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return cur.modCurrency(message, currency)})
   .catch((err) => {
     embeds.printSingleError(message, err);
@@ -168,7 +169,7 @@ function buyCurrency(message, from, to, rate) {
         if(result + amountTo > conv.maxPerWeek){
           embeds.printSingleError(message, "You will go over your weekly conversions (" + conv.maxPerWeek +").");
         } else {
-          routeCheckExists(message)
+          user.getUser(message.author.id)
           .then(function() {
             return databcurr.getFlowers(message.author.id)
             .catch((err) => {
@@ -219,6 +220,22 @@ function buyCurrency(message, from, to, rate) {
         }
       }
     });
+}
+
+async function sellUnit(message, forCurrency) {
+  var args = getArgs(message);
+  try{
+    var unitToSell = args[0];
+    let currentUser = await user.getUser(message.author.id);
+    let userUnit = await units.getUnit(message.author.id, unitToSell);
+    let sellValue = 100;
+    if(await units.deleteUnit(userUnit)){
+      cur.modCurrency(message, forCurrency, sellValue);
+    }
+  }catch(err){
+    embeds.printSingleError(message, err);
+    console.error('Sell Unit Error : ' + err + " - " + err.stack);
+  }
 }
 
 function rollOne(message) {
@@ -284,9 +301,8 @@ function rollFive(message) {
 
 function getChars(message) {
   console.log("GetChars");
-  var arguments = message.content.split(/\s+/);
+  var arguments = getArgs(message);
 
-  var arguments = arguments.slice(2);
   var page = isNaN(arguments[0]) ? 1 : arguments[0];
   var filters = unitFilters.parseIntoFilters(arguments);
 
@@ -294,7 +310,7 @@ function getChars(message) {
   if (!page || page < 1) {
     embeds.printSingle(message, parseInt(colours.error), "Invalid page number!")
   } else {
-    routeCheckExists(message)
+    user.getUser(message.author.id)
     .then(function(){return inv.listUnits(message, page, filters);})
     .catch((err) => {
       embeds.printSingleError(message, err);
@@ -307,19 +323,18 @@ function getUnit(message) {
   console.log("getUnit");
   var index = message.content.split(" ")[2];
 
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return inv.showUnit(message, index);})
   .catch((err) => {
     embeds.printSingleError(message, err);
-    console.error('getUnit routes error : ' + err.stack);
+    console.error('getUnit routes error : ' + err + " - " + err.stack);
   });
 }
 
 function getUser(message){
   console.log("getUser");
 
-  routeCheckExists(message)
-  .then(function(){return user.getUser(message.author.id);})
+  user.getUser(message.author.id)
   .then((user)=>{embeds.printUser(message, parseInt(colours.normal), user);})
   .catch((err) => {
     embeds.printSingleError(message, err);
@@ -333,7 +348,7 @@ function addXp(message) {
   var unit_id = message.content.split(" ")[2];
   var exp = message.content.split(" ")[3];
 
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return modU.addExp(unit_id,exp);})
   .then((success)=>{
     if (success) {
@@ -354,7 +369,7 @@ function sacUnit(message) {
   var indexSac = message.content.split(" ")[3];
   console.log("Feeding unit " + indexSac + " to " + indexTarg);
 
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return modU.feedUnit(message.author.id, indexTarg, indexSac);})
   .then((names) => {
     if (names != false) {
@@ -375,7 +390,7 @@ function upgrUnit(message) {
   indexSac[1] = message.content.split(" ")[4];
   indexSac[2] = message.content.split(" ")[5];
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
-  routeCheckExists(message)
+  user.getUser(message.author.id)
   .then(function(){return modU.upgradeUnit(message.author.id, indexTarg, indexSac[0], indexSac[1], indexSac[2]);})
   .then((target_id) => {
     if (target_id) {

@@ -51,18 +51,18 @@ function addUnitCapacity(user_id,addAmount) {
 function getUser(user_id){
   return dbGetUser.dbGetUserById(user_id)
   .then(data => {
-    return new User(data);
+    if(data && data.user_id==user_id){
+      return new User(data);
+    }else{
+      return Promise.reject("You are not registered for Gacha!");
+    }
   });
 }
 
-
 function exists(user_id){
-  return getUser(user_id)
-  .catch((err)=>{
-    return Promise.resolve(false);
-  })
-  .then(user =>{
-    if(user.user_id==user_id){
+  return dbGetUser.dbGetUserById(user_id)
+  .then(data => {
+    if(data && data.user_id==user_id){
       return Promise.resolve(true);
     }else{
       return Promise.resolve(false);
@@ -70,19 +70,10 @@ function exists(user_id){
   });
 }
 
-function getRemainingUnitCapacity(user_id){
-  return getUser(user_id)
-  .then(user =>{
-    let remainingCap = user.unit_capacity - user.unit_count;
-    return Promise.resolve(remainingCap);
-  });
-}
-
 module.exports = {
   setupUser: setupUser,
   getUser: getUser,
   exists: exists,
-  getRemainingUnitCapacity: getRemainingUnitCapacity,
   addUnitCapacity: addUnitCapacity
 }
 
