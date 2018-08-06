@@ -62,7 +62,7 @@ module.exports = function (message) {
       buyCurrency(message, 'flowers', 'gems', 5);
       break;
     case "sellunit":
-      sellUnit(message, 'clovers');
+      sellUnit(message);
       break;
     case "showunit":
     case "su":
@@ -224,19 +224,27 @@ function buyCurrency(message, from, to, rate) {
     });
 }
 
-async function sellUnit(message, forCurrency) {
+async function sellUnit(message) {
+  let forCurrency = "clovers"
+
   var args = getArgs(message);
   try{
     var unitToSell = args[0];
     let currentUser = await user.getUser(message.author.id);
-    let userUnit = await units.getUnit(message.author.id, unitToSell);
-    let sellValue = 100;
-    if(await units.deleteUnit(userUnit)){
-      cur.modCurrency(message, forCurrency, sellValue);
+    let sellUnit = await units.getUnit(message.author.id, unitToSell);
+    
+    let confirmText = message.guild.member(message.author).displayName + " are you sure you want to sell "
+    + "Lv" + Math.floor(sellUnit.lvl) + " " + iconsunit.getRankIcon(sellUnit.rank) + " " + sellUnit.unit_name + " for "+ sellUnit.getCloverValue() + iconscurr.getCurrencyIcon(forCurrency) + "?"
+
+    if(await embeds.confirmationMessageYN(message, confirmText)){
+      let sellValue = sellUnit.getCloverValue();
+      if(await units.deleteUnit(sellUnit)){
+        cur.modCurrency(message, forCurrency, sellValue);
+      }
     }
   }catch(err){
-    embeds.printSingleError(message, err);
     console.error('Sell Unit Error : ' + err + " - " + err.stack);
+    embeds.printSingleError(message, err.message?err.message:err);
   }
 }
 

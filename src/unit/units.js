@@ -4,17 +4,17 @@ var dbGetUnit = require("../db/getUnits");
 var dbRemoveChars = require("../db/removeUnits");
 
 function genOne(userId){
-  let c = new char(3, 7, userId);
+  let c = char.generate(3, 7, userId);
   return dbUnit.insertUnit(c);
 }
 
 function genShit(userId){
-  let c = new char(5, 7, userId);
+  let c = char.generate(5, 7, userId);
   return dbUnit.insertUnit(c);
 }
 
 function genGood(userId){
-  let c = new char(3, 4, userId);
+  let c = char.generate(3, 4, userId);
   return dbUnit.insertUnit(c);
 }
 
@@ -24,7 +24,7 @@ function getUnit(userId, unitIndex){
     if (unit == null) {
       return Promise.reject("You do not have unit at index " + unitIndex);
     } else {
-      return unit;
+      return new char(unit);
     }
   });
 }

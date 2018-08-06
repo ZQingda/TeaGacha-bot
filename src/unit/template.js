@@ -297,38 +297,66 @@ const chanceRates = {
 }
 
 class char {
-  constructor(min_pg, max_pg, ownerId) {
+  static generate(min_pg, max_pg, userId){
     //Implement rate up chances somehow
-    var char = pullOneByPullGroup(min_pg,max_pg,chars);
+    let genChar = pullOneByPullGroup(min_pg,max_pg,chars);
+    let ini_rank = getRank(genChar.name)
+    let ini_lvl = 1;
+    let template = {
+      unit_name: genChar.name,
+      owner_id: userId,
+      original_owner: genChar.owner,
+      rank: ini_rank,
+      lvl: ini_lvl,
+      atk: getATK(genChar.name, ini_lvl, ini_rank, genChar.specialization),
+      def: getDEF(genChar.name, ini_lvl, ini_rank, genChar.specialization),
+      spd: getSPD(genChar.name, ini_lvl, ini_rank, genChar.specialization),
+      hp: getHP(genChar.name, ini_lvl, ini_rank, genChar.specialization),
+      armor_class: genChar.armor,
+      combat_type: genChar.combat,
+      class: genChar.class,
+      specialization: genChar.specialization
+    };
+    return new char(template);
+  }
 
-    this.owner_id = ownerId;
-    this.unit_name = char.name;
-    this.original_owner = char.owner;
-    this.armor_class = char.armor;
-    this.combat_type = char.combat;
-    this.class = char.class;
-    this.specialization = char.specialization;
-    this.min_rank = char.min_rank;
-    this.max_rank = char.max_rank;
-    this.hp_modifier = char.hp_modifier;
-    this.spd_modifier = char.spd_modifier;
-    this.atk_modifier = char.atk_modifier;
-    this.def_modifier = char.def_modifier;
-    this.pull_group = char.pull_group;
-
-    //console.log(baseStats.atk);
-    //console.log(baseStats.atk["magic"]);
-    //console.log(baseStats.atk[char.combat]);
+  constructor(data) {
     // Rarity between 1 and 7
     // Basic / fine / masterwork / rare / exotic / ascended / legendary
-    // Some function for modifying stats based on rarity
-    var rank = getRank(this.unit_name);
-    this.rank = rank;
-    this.lvl = 1;
-    this.atk = getATK(this.unit_name,this.lvl,this.rank,this.specialization);
-    this.def = getDEF(this.unit_name,this.lvl,this.rank,this.specialization);
-    this.hp = getHP(this.unit_name,this.lvl,this.rank,this.specialization);
-    this.spd = getSPD(this.unit_name,this.lvl,this.rank,this.specialization);
+
+    //Data Which is stored in the DB and should be within Data.
+    this.unit_id = data.unit_id;
+    this.unit_name = data.unit_name;
+    this.owner_id = data.owner_id;
+    this.original_owner = data.original_owner; //This might be removed from the DB so it would be from catalogue
+    this.rank = data.rank;
+    this.lvl = data.lvl;
+    this.inv_index = data.inv_index;
+    this.atk = data.atk;
+    this.def = data.def;
+    this.spd = data.spd;
+    this.hp = data.hp;
+    this.armor_class = data.armor_class;
+    this.combat_type = data.combat_type;
+    this.class = data.class;
+    this.specialization = data.specialization;
+
+    //Fields which are ont stored in the DB should be pulled from the Catalog
+    let catalogChar = chars[this.unit_name];
+    this.min_rank = catalogChar.min_rank;
+    this.max_rank = catalogChar.max_rank;
+    this.hp_modifier = catalogChar.hp_modifier;
+    this.spd_modifier = catalogChar.spd_modifier;
+    this.atk_modifier = catalogChar.atk_modifier;
+    this.def_modifier = catalogChar.def_modifier;
+    this.pull_group = catalogChar.pull_group;
+  }
+
+  getCloverValue(){
+    let basexp = Math.floor(this.lvl? this.lvl:0) * 15
+    let rankModifier = (Math.pow(this.rank? this.rank:0, 2)/10) + 1;
+  
+    return Math.floor(basexp * rankModifier);
   }
 }
 
