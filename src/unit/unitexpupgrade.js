@@ -45,11 +45,20 @@ function adjustStats(id) {
 
 function addModdedEXP(id, level, rank, exp) {
   var moddedEXP = exp;
+  var effectivelvl = level;
   var levelmod = -(((level^1.5)/(100*10)) - 1);
   var rankmod = -(((level^1.5)/(10*10)) - 1);
   moddedEXP = exp * levelmod * rankmod;
-  console.log("Actual EXP gained: " + moddedEXP + ", LVLMod:" + levelmod + ", RANKMOD:" + rankmod);
-  return addExp(id, moddedEXP);
+  while ((effectivelvl - level) < moddedEXP) {
+    console.log("modded exp: " + moddedEXP);
+    effectivelvl += 1;
+    levelmod = -(((effectivelvl^1.5)/(100*10)) - 1);
+    rankmod = -(((effectivelvl^1.5)/(10*10)) - 1);
+    moddedEXP = (exp - (effectivelvl - level)) * levelmod * rankmod;
+  }
+  var expToAdd = (effectivelvl - level) + moddedEXP;
+  console.log("Actual EXP gained: " + expToAdd + ", Original:" + exp);
+  return addExp(id, expToAdd);
 }
 
 function getFeedEXPValue(sacLevel,sacRank,targArmor,targCombat,sacArmor,sacCombat) {
