@@ -16,7 +16,6 @@ var iconscurr = require("./icons/currencyIcons");
 var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
-var admin = require("./user/admin").admins;
 
 module.exports = function (message) {
   msg = message.content.split(' ');
@@ -109,7 +108,7 @@ function getArgs(message){
   return args;
 }
 function resetCurrencyExchange(message){
-  if(admin[message.author.id]){
+  if(config.admins[message.author.id]){
     return databuser.modAllWeeklyConversions(0)
     .then(function(){
       embeds.printSingleNormal(message, "All user's currency exchanges have been reset.");
