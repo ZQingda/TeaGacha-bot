@@ -3,6 +3,7 @@ var colours = require('./config').colours;
 var cur = require("./currency/currency");
 var databcurr = require("./db/currency");
 var databunit = require("./db/getUnits");
+var databuser = require("./db/user");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
 const config = require('./config');
@@ -15,12 +16,15 @@ var iconscurr = require("./icons/currencyIcons");
 var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
-
+var admin = require("./user/admin").admins;
 
 module.exports = function (message) {
   msg = message.content.split(' ');
   //console.log(msg);
   switch (msg[1]) {
+    case "resetcurrencyexchange":
+      resetCurrencyExchange(message);
+      break;
     case "register":
       register(message);
       break;
@@ -104,7 +108,20 @@ function getArgs(message){
   args = args.slice(2);
   return args;
 }
-
+function resetCurrencyExchange(message){
+  if(admin[message.author.id]){
+    return databuser.modAllWeeklyConversions(0)
+    .then(function(){
+      embeds.printSingleNormal(message, "All user's currency exchanges have been reset.");
+    })
+    .catch((err) => {
+      embeds.printSingleError(message, err);
+      console.error('Error : ' + err + " - " + err.stack);
+    })
+  }else{
+    embeds.printSingleError(message, "You don't have access to this command.");
+  }
+}
 
 /**
  * Promise rejection if the user is over their unit capacity or if the user doesn't exist.
@@ -121,7 +138,6 @@ function routeCheckOverUnitCapacity(message){
     }
   })
 }
-
 
 function register(message){
   user.exists(message.author.id)
