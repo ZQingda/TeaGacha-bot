@@ -3,7 +3,6 @@ var colours = require('./config').colours;
 var cur = require("./currency/currency");
 var databcurr = require("./db/currency");
 var databunit = require("./db/getUnits");
-var databuser = require("./db/user");
 var units = require("./unit/units");
 var embeds = require("./messages/message");
 const config = require('./config');
@@ -109,7 +108,7 @@ function getArgs(message){
 }
 function resetCurrencyExchange(message){
   if(config.admins[message.author.id]){
-    return databuser.modAllWeeklyConversions(0)
+    return conv.resetWeeklyConversion()
     .then(function(){
       embeds.printSingleNormal(message, "All user's currency exchanges have been reset.");
     })
