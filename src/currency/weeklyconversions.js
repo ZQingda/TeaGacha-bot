@@ -18,8 +18,13 @@ function addWeeklyConversion (userid, amount) {
   return weeklyConversions;
 }
 
+function resetWeeklyConversion(){
+  return usrcurr.modAllWeeklyConversions(0);
+}
+
 module.exports = {
   getWeeklyConversions: getWeeklyConversions,
   addWeeklyConversion: addWeeklyConversion,
-  maxPerWeek: maxPerWeek
+  maxPerWeek: maxPerWeek,
+  resetWeeklyConversion: resetWeeklyConversion
 }

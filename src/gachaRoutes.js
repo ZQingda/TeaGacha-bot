@@ -16,11 +16,13 @@ var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
 
-
 module.exports = function (message) {
   msg = message.content.split(' ');
   //console.log(msg);
   switch (msg[1]) {
+    case "resetcurrencyexchange":
+      resetCurrencyExchange(message);
+      break;
     case "register":
       register(message);
       break;
@@ -123,6 +125,20 @@ function getUnique(numbers) {
   return true;
 }
 
+function resetCurrencyExchange(message){
+  if(config.admins[message.author.id]){
+    return conv.resetWeeklyConversion()
+    .then(function(){
+      embeds.printSingleNormal(message, "All user's currency exchanges have been reset.");
+    })
+    .catch((err) => {
+      embeds.printSingleError(message, err);
+      console.error('Error : ' + err + " - " + err.stack);
+    })
+  }else{
+    embeds.printSingleError(message, "You don't have access to this command.");
+  }
+}
 
 /**
  * Promise rejection if the user is over their unit capacity or if the user doesn't exist.
@@ -139,7 +155,6 @@ function routeCheckOverUnitCapacity(message){
     }
   })
 }
-
 
 function register(message){
   user.exists(message.author.id)
