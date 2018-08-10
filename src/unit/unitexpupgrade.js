@@ -44,6 +44,12 @@ function adjustStats(id) {
 }
 
 function addModdedEXP(id, level, rank, exp) {
+  var expToAdd = getModdedEXP(id, level, rank, exp);
+  console.log("Actual EXP gained: " + expToAdd + ", Original:" + exp);
+  return addExp(id, expToAdd);
+}
+
+function getModdedEXP(level, rank, exp) {
   var moddedEXP = exp;
   var effectivelvl = level;
   var levelmod = -(((level^1.5)/(100*10)) - 1);
@@ -58,8 +64,7 @@ function addModdedEXP(id, level, rank, exp) {
     //console.log("lvl mod: " + levelmod + " / rankmod: " + rankmod);
   }
   var expToAdd = (effectivelvl - level) + moddedEXP;
-  console.log("Actual EXP gained: " + expToAdd + ", Original:" + exp);
-  return addExp(id, expToAdd);
+  return expToAdd;
 }
 
 function getFeedEXPValue(sacLevel,sacRank,targArmor,targCombat,sacArmor,sacCombat) {
@@ -150,13 +155,11 @@ function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
 
     if (stats.getLvl(charTarg) != 80) { // check if char is lv80
       return "Target unit is not max level.";
-    }
-
-    if (charTarg.rank == chars[charTarg.unit_name].max_rank) {
+    } else if (charTarg.rank == chars[charTarg.unit_name].max_rank) {
       return "Target unit cannot be upgraded any further.";
+    } else {
+      return dbRemoveChars.dbDeleteUnitMulti([charSacs[0].unit_id, charSacs[1].unit_id, charSacs[2].unit_id]);
     }
-
-    return dbRemoveChars.dbDeleteUnitMulti([charSacs[0].unit_id, charSacs[1].unit_id, charSacs[2].unit_id]);
 
   })
   .then(function (success) {
@@ -175,19 +178,48 @@ function upgradeUnit(userid, indexTarg, sac1, sac2, sac3) {
     }
   })
   .then(function(success){
-    if(success){
+    if(success == true){
       return charTarg.unit_id;
-    }else{
-      reject(success);
+    } else {
+      return success;
     }
   });
   return promise;
 }
 
+function getEXPGain(userid, indexTarg, indexSac) {
+  var targ;
+  var sac;
+  var exp;
+  var promise = new Promise(function(resolve) {
+    resolve(dbGetChars.dbGetUnitByIndexMulti(userid, [indexTarg, indexSac]));
+  }).then(function(units) {
+    console.log("units: " + units);
+    if (units) {
+      if (units[0].inv_index == indexTarg) {
+        targ = units[0];
+        sac = units[1];
+      } else {
+        targ = units[1];
+        sac = units[0];
+      }
+      exp = getFeedEXPValue(sac.lvl,sac.rank,targ.armor_class,targ.combat_type,sac.armor_class,sac.combat_type);
+      console.log("exp1: " + exp);
+      exp = getModdedEXP(targ.lvl, targ.rank, exp);
+      console.log("exp2: " + exp);
+      return exp;
+    } else {
+      console.log("...");
+      return -1;
+    }
+  });
+  return promise;
+}
 
 module.exports = {
   addExp : addExp,
   adjustStats : adjustStats,
   feedUnit : feedUnit,
-  upgradeUnit : upgradeUnit
+  upgradeUnit : upgradeUnit,
+  getEXPGain : getEXPGain
 }

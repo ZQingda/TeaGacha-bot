@@ -25,7 +25,7 @@ function newUnitsEmbed(msgEmbed, units, pageNum) {
   var newEmbed = msgEmbed;
   for (var i = 0; i < units.length; i++) {
     var curUnit = units[i];
-    var details = icons.getRankIcon(curUnit.rank) + " - Rarity: " + templ.rankInfo.name[cat[curUnit.name].pull_group]+ "\n**Lv "
+    var details = icons.getRankIcon(curUnit.rank) + " - Rarity: " + templ.rankInfo.name[cat[curUnit.unit_name].pull_group]+ "\n**Lv "
       + getLvl(curUnit) + "** " + curUnit.class + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
 
     newEmbed.addField(curUnit.unit_name, details + "\n---------------------------------------------", true);
@@ -259,5 +259,5 @@ module.exports.printUnitRanks = function (message) {
   for (var i = templ.getRankCount(); i > 0; i--) {
     legend += icons.getRankIcon(i) + "\n";
   }
-  printSingle(message, parseInt(config.colours.normal), legend);
+  module.exports.printSingle(message, parseInt(config.colours.normal), legend);
 }

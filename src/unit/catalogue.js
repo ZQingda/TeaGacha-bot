@@ -413,7 +413,7 @@ module.exports.characters = {
     owner : "Anzy.9237",
     armor : "medium",
     combat : "melee",
-    class: "thief",
+    class: "necromancer",
     specialization : "none",
     min_rank: 1,
     max_rank: 3,
@@ -882,12 +882,12 @@ module.exports.characters = {
     class: "mesmer",
     specialization : "none",
     min_rank: 1,
-    max_rank: 3,
+    max_rank: 5,
     hp_modifier: 1.1,
-    spd_modifier: 1.0,
+    spd_modifier: 1.1,
     atk_modifier: 1.0,
     def_modifier: 1.0,
-    pull_group: 7 //ext
+    pull_group: 6 //ext
   },
   "Kon Arrtist" : {
     name: "Kon Arrtist",
