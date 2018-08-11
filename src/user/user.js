@@ -37,8 +37,8 @@ function setupUser(message) {
 
 /**
  * Addes the given ammount to the given users current unit capacity.
- * @param {*} user_id 
- * @param {*} addAmount 
+ * @param {*} user_id
+ * @param {*} addAmount
  */
 function addUnitCapacity(user_id,addAmount) {
   return getUser(user_id)
@@ -71,15 +71,44 @@ function exists(user_id){
   });
 }
 
+// returns a promise that returns true or false depending on
+// whether the unit indices are valid
+function checkValidUnitIndexes(message, indexes) {
+  console.log("id: " + message.author.id);
+  var promise = new Promise(function(resolve) {
+    resolve(getUser(message.author.id));
+  })
+  .then(function (usr) {
+    console.log("id: " + usr.user_id);
+    if (usr.user_id) {
+      console.log("found usr");
+      console.log("unit count: " + usr.unit_count);
+      for (var i = 0; i < indexes.length; i++) {
+        if (indexes[0] < 1 || indexes[0] > usr.unit_count) {
+          embeds.printSingleError(message, "Invalid unit IDs (out of range).");
+          return false;
+        }
+      }
+    } else {
+      embeds.printSingleError(message, "Cannot find user.");
+      return false;
+    }
+    return true;
+  });
+
+  return promise;
+}
+
 module.exports = {
   setupUser: setupUser,
   getUser: getUser,
   exists: exists,
-  addUnitCapacity: addUnitCapacity
+  addUnitCapacity: addUnitCapacity,
+  checkValidUnitIndexes: checkValidUnitIndexes
 }
 
 /**
- * User Object to be used in DB calls 
+ * User Object to be used in DB calls
  * @param {object} [defaults] - values to assign to the instance
  */
 var User = class {

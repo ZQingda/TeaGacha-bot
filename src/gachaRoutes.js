@@ -107,12 +107,30 @@ module.exports = function (message) {
 /**
  * Returns all the arguments (space delimited) passed into the message (excluding the 1st which splits the gacha route)
  * Ex: message "gacha showunit 1" will return [1]
- * @param {*} message 
+ * @param {*} message
  */
 function getArgs(message, startIndex=2){
   let args = message.content.split(/\s+/);
   args = args.slice(startIndex);
   return args;
+}
+
+// takes in an array of stuff, then uses an n^2
+// loopdeeloop to check if they're all unique.
+// returns a boolean.
+function getUnique(numbers) {
+  for (var i = 0; i < numbers.length; i++) { // really inefficient way
+    for (var j = 0; j < numbers.length; j++) { // of checking for unique vals
+      if (i == j) {
+        continue;
+      } else {
+        if (numbers[i] == numbers[j]) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 /**
@@ -124,7 +142,8 @@ function routeCheckOverUnitCapacity(message){
   .then(user => {
     let remainingCap = user.unit_capacity - user.unit_count;
     if(remainingCap<0){
-      return Promise.reject("You are currently " + Math.abs(remainingCap) + " units over your capacity!  You need to reduce your unit count before using this comand.");
+      return Promise.reject("You are currently " + Math.abs(remainingCap) +
+      " units over your capacity!  You need to reduce your unit count before using this comand.");
     }else{
       return Promise.resolve(remainingCap);
     }
@@ -231,7 +250,7 @@ async function sellUnit(message) {
     var unitToSell = args[0];
     let currentUser = await user.getUser(message.author.id);
     let sellUnit = await units.getUnit(message.author.id, unitToSell);
-    
+
     let confirmText = message.guild.member(message.author).displayName + " are you sure you want to sell "
     + "Lv" + Math.floor(sellUnit.lvl) + " " + iconsunit.getRankIcon(sellUnit.rank) + " " + sellUnit.unit_name + " for "+ sellUnit.getCloverValue() + iconscurr.getCurrencyIcon(forCurrency) + "?"
 
@@ -249,7 +268,7 @@ async function sellUnit(message) {
 
 function rollOne(message) {
   routeCheckOverUnitCapacity(message)
-  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return cur.modCurrency(message, 'gems', -5)})
   .then(function(){return units.genOne(message.author.id)})
   .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
   .catch((err) => {
@@ -260,7 +279,7 @@ function rollOne(message) {
 
 function rollOneShit(message) {
   routeCheckOverUnitCapacity(message)
-  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return cur.modCurrency(message, 'gems', -5)})
   .then(function(){return units.genShit(message.author.id)})
   .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
   .catch((err) => {
@@ -271,7 +290,7 @@ function rollOneShit(message) {
 
 function rollOneGood(message) {
   routeCheckOverUnitCapacity(message)
-  .then(function(){return cur.modCurrency(message, 'clovers', -5)})
+  .then(function(){return cur.modCurrency(message, 'gems', -5)})
   .then(function(){return units.genGood(message.author.id)})
   .then((u)=>{embeds.printNewUnit(message, parseInt(colours.normal), u)})
   .catch((err) => {
@@ -282,7 +301,7 @@ function rollOneGood(message) {
 
 function rollFive(message) {
   routeCheckOverUnitCapacity(message)
-  .then(function(){return cur.modCurrency(message, 'clovers', -25);})
+  .then(function(){return cur.modCurrency(message, 'gems', -25);})
   .then(function(){
     var unitPromises =[];
     //Generate 4 Random Units
@@ -374,28 +393,53 @@ function addXp(message) {
 
 
 function sacUnit(message) {
-  var indexTarg = message.content.split(" ")[2];
-  var indexSac = message.content.split(" ")[3];
+  var price;
+  var args = getArgs(message);
+  if (args.length < 2) {
+    embeds.printSingleError(message, "Invalid number of arguments. Requires 2.");
+    return;
+  }
+  var indexTarg = args[0];
+  var indexSac = args[1];
   console.log("Feeding unit " + indexSac + " to " + indexTarg);
   var targID;
+  var sac;
+  var targ;
+  var usr;
+  var price;
 
   user.getUser(message.author.id)
-  .then(function (usr) {
-    if (usr.user_id) {
-      console.log("found usr");
-      console.log("unit count: " + usr.unit_count);
-      if ((indexTarg > 0 && indexTarg <= usr.unit_count) && (indexSac > 0 && indexSac <= usr.unit_count)) {
-        return databunit.dbGetUnitByIndexMulti(message.author.id, [indexSac, indexTarg]);
+  .then(function (theuser) {
+    if (theuser.user_id) {
+      usr = theuser;
+      return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+    } else {
+      return false;
+    }
+  })
+  .then(function (result) {
+    console.log("checked validity..");
+    if (result) {
+      for (var i = 0; i < args.length; i++) {
+        if (Number(args[i]) == NaN) {
+          embeds.printSingleError(message, "Unit IDs must be numbers.");
+          return false;
+        }
       }
-    } else { return false; }
+      if (getUnique([indexTarg, indexSac])) {
+        return databunit.dbGetUnitByIndexMulti(message.author.id, [indexTarg, indexSac]);
+      } else {
+        embeds.printSingleError(message, "Unit IDs must be unique.");
+        return false;
+      }
+    } else {
+      return false;
+    }
   })
   .then(function(units) {
     console.log(units);
     if (units) {
-      var sac;
-      var targ;
       if (units[0].inv_index == indexSac) {
-        console.log("sac is" + units[0].inv_index);
         sac = units[0];
         targ = units[1];
         return [sac, targ];
@@ -404,19 +448,33 @@ function sacUnit(message) {
         targ = units[0];
         return [sac, targ];
       }
+    } else {
+      return false;
     }
   })
   .then(function(units) {
-    var sac = units[0];
-    var targ = units[1];
-    targID = targ.unit_id;
-    console.log("sac is " + sac.inv_index);
-    console.log("targ is" + targ.inv_index);
-    return embeds.confirmationMessageYN(message, "Are you sure you want to use " +
-    "Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + " to upgrade " +
-    "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?");
+    if (units) {
+      sac = units[0];
+      targ = units[1];
+      targID = targ.unit_id;
+      price = modU.getUpgradePriceUnit(targ);
+      if (usr.clovers < price) {
+        embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+        return false;
+      } else {
+        return modU.getEXPGain(message.author.id, indexTarg, indexSac);
+      }
+    } else { return false; }
   })
-  .then(function(result){
+  .then(function(expgain) {
+    if (expgain) {
+      return embeds.confirmationMessageYN(message, "Are you sure you want to use:\n" +
+      "**Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + "**\n\nto upgrade\n" +
+      "**Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "**?\n\n**Exp Gain**: " +
+      expgain.toFixed(2) + " levels" + "\n\n**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+    } else { return false; }
+  })
+  .then(function(result) {
     console.log(result);
     if (result) {
       return modU.feedUnit(message.author.id, indexTarg, indexSac);
@@ -429,6 +487,15 @@ function sacUnit(message) {
       message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
       console.log("id: " + targID);
       inv.showUnitById(message, targID);
+      return true;
+    } else {
+      return false;
+    }
+  })
+  .then(function(result){
+    if (result) {
+      cur.modCurrency(message, "clovers", -1*price);
+      return true;
     } else {
       return false;
     }
@@ -439,16 +506,79 @@ function sacUnit(message) {
   });
 }
 
+// upgrades (ranks up) a unit.
 function upgrUnit(message) {
-  var indexTarg = message.content.split(" ")[2];
+  var args = getArgs(message);
+  if (args.length < 4) {
+    embeds.printSingleError(message, "Invalid number of arguments. Requires 4.");
+    return;
+  }
+
+  var indexTarg = args[0];
   var indexSac = [0,0,0];
-  indexSac[0] = message.content.split(" ")[3];
-  indexSac[1] = message.content.split(" ")[4];
-  indexSac[2] = message.content.split(" ")[5];
+  indexSac[0] = args[1];
+  indexSac[1] = args[2];
+  indexSac[2] = args[3];
+  var targ;
+  var sacs = [];
+  var price;
+  var usr;
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
   user.getUser(message.author.id)
-  .then(function() {
-    return embeds.confirmationMessage(message);
+  .then(function (theuser) {
+    if (theuser.user_id) {
+      usr = theuser;
+      return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+    } else {
+      return false;
+    }
+  })
+  .then(function (result) {
+    console.log("checked validity..");
+    if (result) {
+      for (var i = 0; i < args.length; i++) {
+        if (Number(args[i]) == NaN) {
+          embeds.printSingleError(message, "Unit IDs must be numbers.");
+          return false;
+        }
+      }
+      if (getUnique([indexTarg, indexSac[0], indexSac[1], indexSac[2]])) {
+        return databunit.dbGetUnitByIndexMulti(message.author.id, [indexTarg, indexSac[0], indexSac[1], indexSac[2]]);
+      } else {
+        embeds.printSingleError(message, "Unit IDs must be unique.");
+        return false;
+      }
+    } else {
+      return false;
+    }
+  })
+  .then(function(units) {
+    console.log(units);
+    if (units != false) {
+      var sacCount = 0;
+      for (var i = 0; i < units.length; i++) {
+        if (units[i].inv_index == indexTarg) {
+          targ = units[i];
+        } else {
+          sacs[sacCount] = units[i];
+          sacCount += 1;
+        }
+      }
+      price = modU.getUpgradePriceUnit(targ);
+      if (usr.clovers < price) {
+        embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+        return false;
+      } else {
+        return embeds.confirmationMessageYN(message, "Are you sure you want to use:\n" +
+        "Lv" + Math.floor(sacs[0].lvl) + " " + iconsunit.getRankIcon(sacs[0].rank) + " " + sacs[0].unit_name + "\n" +
+        "Lv" + Math.floor(sacs[1].lvl) + " " + iconsunit.getRankIcon(sacs[1].rank) + " " + sacs[1].unit_name + "\n" +
+        "Lv" + Math.floor(sacs[2].lvl) + " " + iconsunit.getRankIcon(sacs[2].rank) + " " + sacs[2].unit_name + "\n\nto rank up:\n" +
+        "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?\n\n" +
+        "**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+      }
+    } else {
+      return false;
+    }
   })
   .then(function(result){
     if (result) {
@@ -457,17 +587,29 @@ function upgrUnit(message) {
       return false;
     }
   })
-  .then((target_id) => {
+  .then(function(result) {
+    if (isNaN(result)) {
+      embeds.printSingleError(message, result);
+      return false;
+    } else {
+      return result;
+    }
+  })
+  .then(function(target_id) {
     if (target_id) {
-      embeds.printSingle(message, parseInt(colours.normal), "Character was upgraded!");
+      embeds.printSingleNormal(message, "Character was upgraded!");
       return inv.showUnitById(message, target_id);
     } else {
-      embeds.printSingleError(message, "Target Id not Returned after Upgrade Unit");
-      return false;
+      if (target_id != false) {
+        embeds.printSingleError(message, "Target Id not Returned after Upgrade Unit");
+      } else {
+        return false;
+      }
     }
   })
   .then((success) => {
     if (success) {
+      return cur.modCurrency(message, "clovers", -1*price);
       console.log("successful sacrifice");
     } else {
       console.log("failed sacrifice");

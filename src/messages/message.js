@@ -259,5 +259,5 @@ module.exports.printUnitRanks = function (message) {
   for (var i = templ.getRankCount(); i > 0; i--) {
     legend += icons.getRankIcon(i) + "\n";
   }
-  printSingle(message, parseInt(config.colours.normal), legend);
+  module.exports.printSingle(message, parseInt(config.colours.normal), legend);
 }
