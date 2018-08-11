@@ -408,6 +408,7 @@ function addXp(message) {
 
 
 function sacUnit(message) {
+  var price;
   var args = getArgs(message);
   if (args.length < 2) {
     embeds.printSingleError(message, "Invalid number of arguments. Requires 2.");
@@ -419,8 +420,14 @@ function sacUnit(message) {
   var targID;
   var sac;
   var targ;
+  var usr;
+  var price;
 
-  user.checkValidUnitIndexes(message, [indexTarg, indexSac])
+  user.getUser(message.author.id)
+  .then(function (theuser) {
+    usr = theuser;
+    return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+  })
   .then(function (result) {
     console.log("checked validity..");
     if (result) {
@@ -444,7 +451,6 @@ function sacUnit(message) {
     console.log(units);
     if (units) {
       if (units[0].inv_index == indexSac) {
-        console.log("sac is" + units[0].inv_index);
         sac = units[0];
         targ = units[1];
         return [sac, targ];
@@ -459,16 +465,28 @@ function sacUnit(message) {
     sac = units[0];
     targ = units[1];
     targID = targ.unit_id;
-    console.log("sac is " + sac.inv_index);
-    console.log("targ is" + targ.inv_index);
-    return modU.getEXPGain(message.author.id, indexTarg, indexSac);
+    price = modU.getUpgradePriceUnit(targ);
+    if (usr.clovers < price) {
+      embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+      return false;
+    } else {
+      return modU.getEXPGain(message.author.id, indexTarg, indexSac);
+    }
   })
   .then(function(expgain) {
     return embeds.confirmationMessageYN(message, "Are you sure you want to use " +
     "Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + " to upgrade " +
-    "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?\n\n**Exp Gain**: " + expgain.toFixed(2) + " levels");
+    "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?\n\n**Exp Gain**: " +
+    expgain.toFixed(2) + " levels" + "\n\n**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
   })
   .then(function(result){
+    if (result) {
+      cur.modCurrency(message, "clovers", -1*price);
+      return true;
+    } else {
+      return false;
+    }
+  }).then(function(result) {
     console.log(result);
     if (result) {
       return modU.feedUnit(message.author.id, indexTarg, indexSac);

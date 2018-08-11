@@ -216,10 +216,20 @@ function getEXPGain(userid, indexTarg, indexSac) {
   return promise;
 }
 
+function getSacPriceUnit(unit) {
+  return unit.rank*10 + unit.lvl;
+}
+
+function getUpgradePriceUnit(unit) {
+  return unit.rank*100;
+}
+
 module.exports = {
   addExp : addExp,
   adjustStats : adjustStats,
   feedUnit : feedUnit,
   upgradeUnit : upgradeUnit,
-  getEXPGain : getEXPGain
+  getEXPGain : getEXPGain,
+  getSacPriceUnit : getSacPriceUnit,
+  getUpgradePriceUnit : getUpgradePriceUnit
 }
