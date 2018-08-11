@@ -138,7 +138,7 @@ function dbGetUnitByRoster(userid, rosterIdx){
         console.log("Got a unit.");
         resolve(row);
       } else {
-        console.log("No unit found at roster index");
+        console.log("No unit found at roster slot");
         resolve(row);
       }
     });
@@ -146,6 +146,54 @@ function dbGetUnitByRoster(userid, rosterIdx){
   });
   return promise;
 }
+
+/**
+ * gets at least 2 units from the DB. AT LEAST 2.
+ * @param {Number} userid
+ * @param {Array} indexes
+ * @returns promise DB Rows
+ */
+function dbGetUnitByRosterMulti(userid, indexes) {
+  var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Connected for char retrieval.');
+  });
+  let sqlquery = "SELECT * FROM units WHERE owner_id = ? AND (";
+  sqlquery += "roster = ? or ".repeat(indexes.length-1);
+  sqlquery += "roster = ?);";
+
+  var parms = [userid]
+  parms = parms.concat(indexes);
+
+  let promise = new Promise(function(resolve, reject) {
+    db.all(sqlquery, parms, (err, rows) => {
+      if (err) {
+        console.log(err);
+      }
+
+      if(indexes.length==rows.length){
+        console.log("Got all " + rows.length + " requested units.");
+        resolve(rows);
+      }else{
+        var invalidIndexes = indexes.filter(findIndex => {
+          let filter = rows.filter(unit => {
+            return unit.roster==findIndex;
+          });
+          return filter.length==0;
+        });
+        console.log("Query for roster slots "+ indexes + " unable to find indexes" + invalidIndexes);
+        reject("No units found for the following roster slot: " + invalidIndexes.join(", "));
+      }
+    });
+    db.close();
+  });
+  return promise;
+}
+
+
+
 /**
  * Get a single units by its userId & Inventory Index.
  * @param {Number} userid
@@ -218,7 +266,7 @@ function dbGetUnitByIndexMulti(userid, indexes) {
           return filter.length==0;
         });
         console.log("Query for indexes "+ indexes + " unable to find indexes" + invalidIndexes);
-        reject("No units found for user at the following locations: " + invalidIndexes.join(", "));
+        reject("No units found for the following positions: " + invalidIndexes.join(", "));
       }
     });
     db.close();
@@ -268,5 +316,6 @@ module.exports = {
   dbGetUnitIdByIndex : dbGetUnitIdByIndex,
   dbGetUnitIdByIndexMulti : dbGetUnitIdByIndexMulti,
 
-  dbGetRoster : dbGetRoster
+  dbGetRoster : dbGetRoster,
+  dbGetUnitByRosterMulti : dbGetUnitByRosterMulti
 }

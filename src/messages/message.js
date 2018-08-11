@@ -142,12 +142,12 @@ module.exports.printRoster = async function (message, colour, title, units) {
         var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + curUnit.lvl + "** " + curUnit.class
           + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
 
-        msgEmbed.addField((i + 1) + ". " + curUnit.unit_name + " [" + curUnit.unit_id + "]", details + "\n---------------------------", true);
+        msgEmbed.addField((i + 1) + ". " + curUnit.unit_name + " [" + curUnit.inv_index + "]", details + "\n---------------------------", true);
       }
     }
-    //if (!found) {
-    //  msgEmbed.addField((i + 1) + ".", "\n\n\n\n---------------------------", true);
-    //}
+    if(!found){
+      msgEmbed.addField((i + 1) + ".", "(Empty)", true);
+    }
     if (i % 2 == 1) {
       msgEmbed.addBlankField(true);
     }

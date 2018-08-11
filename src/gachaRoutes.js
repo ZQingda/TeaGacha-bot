@@ -16,6 +16,7 @@ var iconscurr = require("./icons/currencyIcons");
 var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
+var util = require("./util/argUtil");
 
 /**
  * Routing all messages which start with "gacha "
@@ -113,24 +114,6 @@ function getArgs(message, startIndex=2){
   let args = message.content.split(/\s+/);
   args = args.slice(startIndex);
   return args;
-}
-
-// takes in an array of stuff, then uses an n^2
-// loopdeeloop to check if they're all unique.
-// returns a boolean.
-function getUnique(numbers) {
-  for (var i = 0; i < numbers.length; i++) { // really inefficient way
-    for (var j = 0; j < numbers.length; j++) { // of checking for unique vals
-      if (i == j) {
-        continue;
-      } else {
-        if (numbers[i] == numbers[j]) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
 }
 
 /**
@@ -426,7 +409,7 @@ function sacUnit(message) {
           return false;
         }
       }
-      if (getUnique([indexTarg, indexSac])) {
+      if (util.getUnique([indexTarg, indexSac])) {
         return databunit.dbGetUnitByIndexMulti(message.author.id, [indexTarg, indexSac]);
       } else {
         embeds.printSingleError(message, "Unit IDs must be unique.");
@@ -542,7 +525,7 @@ function upgrUnit(message) {
           return false;
         }
       }
-      if (getUnique([indexTarg, indexSac[0], indexSac[1], indexSac[2]])) {
+      if (util.getUnique([indexTarg, indexSac[0], indexSac[1], indexSac[2]])) {
         return databunit.dbGetUnitByIndexMulti(message.author.id, [indexTarg, indexSac[0], indexSac[1], indexSac[2]]);
       } else {
         embeds.printSingleError(message, "Unit IDs must be unique.");

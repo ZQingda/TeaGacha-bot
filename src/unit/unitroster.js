@@ -1,22 +1,21 @@
 const config = require('../config');
-var char = require("./template").char;
-var dbGetUnit = require("../db/getUnits");
+var Units = require("./units");
 var dbModUnit = require("../db/modUnits");
 
-function getRoster(userId){
-  return dbGetUnit.dbGetRoster(userId)
-  .then(function (results) {
-    let units = [];
-    if(results!=null){
-      results.forEach(unit => 
-        units.push(new char(unit))
-      );
-    }
-    return units;
-  });
+/**
+ * Return true if the given Roster Slot # is valid
+ */
+function rosterSlotValid(number){
+  if(isNaN(number) || number<=0 || number> config.rosterLength){
+    return false;
+  }
+  return true;
 }
 
-function removeFromRoster(unitId){
+/**
+ * Remove the given unit from the roster.
+ */
+function removeRosterUnit(unitId){
   return dbModUnit.modUnit(unitId, "roster", -1);
 }
 
@@ -30,7 +29,7 @@ async function addToRoster(user, rosterAdditionIndexes){
   let removeUnits = [];
   let unchangedUnits = [];
 
-  let currentRoster = await getRoster(user.user_id);
+  let currentRoster = await Units.getRoster(user.user_id);
   currentRoster.forEach(currentUnit => {
     let addingNewUnit = addUnits.filter(addItem=> addItem.unit_id==currentUnit.unit_id).length==0;
     if(rosterAdditionIndexes[currentUnit.roster]){
@@ -40,8 +39,8 @@ async function addToRoster(user, rosterAdditionIndexes){
     }
   });
   
-  let addedPoints = addUnits.reduce((total, unit) => total + unit.getPointValue(), 0 )
-  let currentStaticPoints = unchangedUnits.reduce((total, unit) => total + unit.getPointValue(), 0 )
+  let addedPoints = addUnits.reduce((total, u) => total + u.getPointValue(), 0 )
+  let currentStaticPoints = unchangedUnits.reduce((total, u) => total + u.getPointValue(), 0 )
   let newRosterPoints = addedPoints + currentStaticPoints;
 
   
@@ -50,15 +49,19 @@ async function addToRoster(user, rosterAdditionIndexes){
   }
   let removePromises =[];
   removeUnits.forEach(unitToRemove => 
-    removePromises.push( removeFromRoster(unitToRemove.unit_id) )
+    removePromises.push( removeRosterUnit(unitToRemove.unit_id) )
   );
   let output = await Promise.all(removePromises);
 
   let addPromises = []
 
-  for(let [rosterNumber, unitToAdd] of Object.entries(rosterAdditionIndexes)){
-    await dbModUnit.modUnit(unitToAdd.unit_id, "roster", rosterNumber);
-    unitToAdd.roster = rosterNumber; //Update the unit so we can return the accurate roster.
+  for(let [rosterSlot, unitToAdd] of Object.entries(rosterAdditionIndexes)){
+    if(rosterSlotValid(rosterSlot)){
+      await dbModUnit.modUnit(unitToAdd.unit_id, "roster", rosterSlot);
+      unitToAdd.roster = rosterSlot; //Update the unit so we can return the accurate roster.
+    }else{
+      throw Error("Roster slot " + newRosterSlot + " is invalid. Must be a number between 1 and " + config.rosterLength);
+    }
   }
 
   let newRoster = unchangedUnits.concat(addUnits);
@@ -68,7 +71,7 @@ async function addToRoster(user, rosterAdditionIndexes){
 
 
 module.exports = {
-  getRoster: getRoster,
-  removeFromRoster: removeFromRoster,
+  removeRosterUnit: removeRosterUnit,
   addToRoster: addToRoster,
+  rosterSlotValid: rosterSlotValid
 }
