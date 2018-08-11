@@ -149,7 +149,8 @@ function routeCheckOverUnitCapacity(message){
   .then(user => {
     let remainingCap = user.unit_capacity - user.unit_count;
     if(remainingCap<0){
-      return Promise.reject("You are currently " + Math.abs(remainingCap) + " units over your capacity!  You need to reduce your unit count before using this comand.");
+      return Promise.reject("You are currently " + Math.abs(remainingCap) +
+      " units over your capacity!  You need to reduce your unit count before using this comand.");
     }else{
       return Promise.resolve(remainingCap);
     }
@@ -425,8 +426,12 @@ function sacUnit(message) {
 
   user.getUser(message.author.id)
   .then(function (theuser) {
-    usr = theuser;
-    return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+    if (theuser.user_id) {
+      usr = theuser;
+      return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+    } else {
+      return false;
+    }
   })
   .then(function (result) {
     console.log("checked validity..");
@@ -459,34 +464,33 @@ function sacUnit(message) {
         targ = units[0];
         return [sac, targ];
       }
+    } else {
+      return false;
     }
   })
   .then(function(units) {
-    sac = units[0];
-    targ = units[1];
-    targID = targ.unit_id;
-    price = modU.getUpgradePriceUnit(targ);
-    if (usr.clovers < price) {
-      embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
-      return false;
-    } else {
-      return modU.getEXPGain(message.author.id, indexTarg, indexSac);
-    }
+    if (units) {
+      sac = units[0];
+      targ = units[1];
+      targID = targ.unit_id;
+      price = modU.getUpgradePriceUnit(targ);
+      if (usr.clovers < price) {
+        embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+        return false;
+      } else {
+        return modU.getEXPGain(message.author.id, indexTarg, indexSac);
+      }
+    } else { return false; }
   })
   .then(function(expgain) {
-    return embeds.confirmationMessageYN(message, "Are you sure you want to use " +
-    "Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + " to upgrade " +
-    "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?\n\n**Exp Gain**: " +
-    expgain.toFixed(2) + " levels" + "\n\n**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+    if (expgain) {
+      return embeds.confirmationMessageYN(message, "Are you sure you want to use:\n" +
+      "**Lv" + Math.floor(sac.lvl) + " " + iconsunit.getRankIcon(sac.rank) + " " + sac.unit_name + "**\n\nto upgrade\n" +
+      "**Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "**?\n\n**Exp Gain**: " +
+      expgain.toFixed(2) + " levels" + "\n\n**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+    } else { return false; }
   })
-  .then(function(result){
-    if (result) {
-      cur.modCurrency(message, "clovers", -1*price);
-      return true;
-    } else {
-      return false;
-    }
-  }).then(function(result) {
+  .then(function(result) {
     console.log(result);
     if (result) {
       return modU.feedUnit(message.author.id, indexTarg, indexSac);
@@ -499,6 +503,15 @@ function sacUnit(message) {
       message.channel.send(names[0] + " was used to strengthen the level " + names[2] + " " + names[1]);
       console.log("id: " + targID);
       inv.showUnitById(message, targID);
+      return true;
+    } else {
+      return false;
+    }
+  })
+  .then(function(result){
+    if (result) {
+      cur.modCurrency(message, "clovers", -1*price);
+      return true;
     } else {
       return false;
     }
@@ -524,8 +537,18 @@ function upgrUnit(message) {
   indexSac[2] = args[3];
   var targ;
   var sacs = [];
+  var price;
+  var usr;
   console.log("Upgrading unit " + indexTarg + " with units " + indexSac[0] + ", " + indexSac[1] + ", " + indexSac[2]);
-  user.checkValidUnitIndexes(message, [indexTarg, indexSac])
+  user.getUser(message.author.id)
+  .then(function (theuser) {
+    if (theuser.user_id) {
+      usr = theuser;
+      return user.checkValidUnitIndexes(message, [indexTarg, indexSac]);
+    } else {
+      return false;
+    }
+  })
   .then(function (result) {
     console.log("checked validity..");
     if (result) {
@@ -546,6 +569,7 @@ function upgrUnit(message) {
     }
   })
   .then(function(units) {
+    console.log(units);
     if (units != false) {
       var sacCount = 0;
       for (var i = 0; i < units.length; i++) {
@@ -556,11 +580,18 @@ function upgrUnit(message) {
           sacCount += 1;
         }
       }
-      return embeds.confirmationMessageYN(message, "Are you sure you want to use " +
-      "Lv" + Math.floor(sacs[0].lvl) + " " + iconsunit.getRankIcon(sacs[0].rank) + " " + sacs[0].unit_name + ", " +
-      "Lv" + Math.floor(sacs[1].lvl) + " " + iconsunit.getRankIcon(sacs[1].rank) + " " + sacs[1].unit_name + ", and " +
-      "Lv" + Math.floor(sacs[2].lvl) + " " + iconsunit.getRankIcon(sacs[2].rank) + " " + sacs[2].unit_name + " to rank up " +
-      "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?");
+      price = modU.getUpgradePriceUnit(targ);
+      if (usr.clovers < price) {
+        embeds.printSingleError(message, "You do not have enough clovers. You need " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+        return false;
+      } else {
+        return embeds.confirmationMessageYN(message, "Are you sure you want to use:\n" +
+        "Lv" + Math.floor(sacs[0].lvl) + " " + iconsunit.getRankIcon(sacs[0].rank) + " " + sacs[0].unit_name + "\n" +
+        "Lv" + Math.floor(sacs[1].lvl) + " " + iconsunit.getRankIcon(sacs[1].rank) + " " + sacs[1].unit_name + "\n" +
+        "Lv" + Math.floor(sacs[2].lvl) + " " + iconsunit.getRankIcon(sacs[2].rank) + " " + sacs[2].unit_name + "\n\nto rank up:\n" +
+        "Lv" + Math.floor(targ.lvl) + " " + iconsunit.getRankIcon(targ.rank) + " " + targ.unit_name + "?\n\n" +
+        "**Price**: " + price + " " + iconscurr.getCurrencyIcon("clovers"));
+      }
     } else {
       return false;
     }
@@ -594,6 +625,7 @@ function upgrUnit(message) {
   })
   .then((success) => {
     if (success) {
+      return cur.modCurrency(message, "clovers", -1*price);
       console.log("successful sacrifice");
     } else {
       console.log("failed sacrifice");
