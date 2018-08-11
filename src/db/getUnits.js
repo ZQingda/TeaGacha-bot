@@ -28,21 +28,6 @@ function dbGetRoster(userid) {
   return promise;
 }
 
-function dbSetUnitRoster(userid, roster, unitid, rosterpos) {
-
-  let promise = new Promise(function(resolve, reject) {
-    var db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {
-      if (err) {
-        console.error(err.message);
-        console.log("dbSetUnitRoster BEEP BOOP OH NO");
-      }
-      console.log('Connected for roster retrieval.');
-    });
-
-    let sqlquery = "UPDATE units SET roster = ? WHERE unit_id = ?";
-  });
-}
-
 // gets all owned units of a specified user
 // returns: Promise (array of units)
 function dbGetOwnedUnits(userid, filters) {
@@ -141,6 +126,26 @@ function dbGetUnitByIDMulti(ids) {
   return promise;
 }
 
+function dbGetUnitByRoster(userid, rosterIdx){
+  let db = new sqlite3.Database(config.connection, sqlite3.OPEN_READ, (err) => {if (err) {reject(err);}});
+  let sqlquery = "SELECT * FROM units WHERE userid = ? AND roster = ?;";
+  let promise = new Promise(function(resolve, reject) {
+    db.get(sqlquery, [userid, rosterIdx], (err, row) => {
+      if (err) {
+        reject(err);
+      }
+      if (row !== null) {
+        console.log("Got a unit.");
+        resolve(row);
+      } else {
+        console.log("No unit found at roster index");
+        resolve(row);
+      }
+    });
+    db.close();
+  });
+  return promise;
+}
 /**
  * Get a single units by its userId & Inventory Index.
  * @param {Number} userid
@@ -257,6 +262,8 @@ module.exports = {
 
   dbGetUnitByIndex : dbGetUnitByIndex,
   dbGetUnitByIndexMulti: dbGetUnitByIndexMulti,
+
+  dbGetUnitByRoster: dbGetUnitByRoster,
 
   dbGetUnitIdByIndex : dbGetUnitIdByIndex,
   dbGetUnitIdByIndexMulti : dbGetUnitIdByIndexMulti,

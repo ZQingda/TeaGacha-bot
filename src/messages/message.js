@@ -128,12 +128,12 @@ module.exports.printCurrency = function (message, colour, currency, curValue) {
   message.channel.send(msg);
 }
 
-module.exports.printRoster = async function (message, colour, units) {
+module.exports.printRoster = async function (message, colour, title, units) {
   var msgEmbed = new Discord.RichEmbed();
   console.log("ROSTER : " + units);
   msgEmbed.setColor(colour);
-  msgEmbed.setTitle("**__" + message.guild.member(message.author).displayName + "'s roster__**");
-  for (var i = 0; i < 5; i++) {
+  msgEmbed.setTitle("**__" + title + "__**");
+  for (var i = 0; i < config.rosterLength; i++) {
     let found = false;
     for (var j = 0; j < units.length; j++) {
       if (units[j].roster == (i + 1)) {

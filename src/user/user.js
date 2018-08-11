@@ -16,7 +16,8 @@ function setupUser(message) {
       clovers: 50,
       energy:20,
       energy_max:20,
-      unit_capacity: 20
+      unit_capacity: 20,
+      roster_point_capacity: 25
   });
   var promise = dbUser.insertUser(u)
   .then((retUser)=>embeds.printUser(message, parseInt(colours.normal), retUser))
@@ -89,6 +90,7 @@ var User = class {
     this.energy = defaults.hasOwnProperty('energy')? defaults.energy : 0;
     this.energy_max = defaults.hasOwnProperty('energy_max')? defaults.energy_max : 0;
     this.unit_capacity = defaults.hasOwnProperty('unit_capacity')? defaults.unit_capacity : 0;
+    this.roster_point_capacity = defaults.hasOwnProperty('roster_point_capacity')? defaults.roster_point_capacity : 0;
     this.unit_count = defaults.hasOwnProperty('unit_count')? defaults.unit_count : this.unit_capacity; //Defaults unit count to unit capacity
   }
 }

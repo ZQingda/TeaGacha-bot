@@ -4,9 +4,9 @@ const config = require('../config');
 function insertUser(user) {
   return new Promise(function(resolve, reject) {
     let db = new sqlite3.Database(config.connection, (err) => {if (err) {reject(err);}});
-    let sqlInsertUser = 'INSERT INTO users (user_id, gems, clovers, energy, energy_max, unit_capacity) VALUES( ?, ?, ?, ?, ?, ?)';
+    let sqlInsertUser = 'INSERT INTO users (user_id, gems, clovers, energy, energy_max, unit_capacity, roster_point_capacity) VALUES( ?, ?, ?, ?, ?, ?, ?)';
 
-    db.run(sqlInsertUser, [user.user_id, user.gems, user.clovers, user.energy, user.energy_max, user.unit_capacity], (err) => {
+    db.run(sqlInsertUser, [user.user_id, user.gems, user.clovers, user.energy, user.energy_max, user.unit_capacity, user.roster_point_capacity], (err) => {
       if (err) {reject (err);}
       resolve(user);
     });

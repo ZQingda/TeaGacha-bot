@@ -6,6 +6,7 @@
   },
   "connection" : "./database/gachiGacha.db",
   "pageLength" : 8,
+  "rosterLength" : 5,
   "admins" : {
     "Anzy" : false,
     "78615507703439360" : true,

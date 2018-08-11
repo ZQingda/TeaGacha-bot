@@ -12,20 +12,21 @@ module.exports.newDB = function (connection) {
 
 module.exports.initDB = function (db) {
   var userCreate = 'CREATE TABLE IF NOT EXISTS users (';
-  userCreate += 'user_id INTEGER PRIMARY KEY NOT NULL,';
+  userCreate += 'user_id TEXT PRIMARY KEY NOT NULL,';
   userCreate += 'username TEXT UNIQUE,';
   userCreate += 'gems  INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'clovers INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'energy	INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'energy_max	INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'unit_capacity	INTEGER NOT NULL DEFAULT 0,';
+  userCreate += 'roster_point_capacity	INTEGER NOT NULL DEFAULT 0,';
   userCreate += 'weeklyconversions INTEGER';
   userCreate += ');';
 
   var unitCreate = 'CREATE TABLE IF NOT EXISTS units (';
   unitCreate += 'unit_id INTEGER PRIMARY KEY NOT NULL,';
   unitCreate += 'unit_name TEXT,';
-  unitCreate += 'owner_id INTEGER NOT NULL,';
+  unitCreate += 'owner_id TEXT NOT NULL,';
   unitCreate += 'original_owner TEXT,';
   unitCreate += 'inv_index INTEGER,';
   unitCreate += 'rank INTEGER NOT NULL DEFAULT 1,';

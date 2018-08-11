@@ -315,7 +315,8 @@ class char {
       armor_class: genChar.armor,
       combat_type: genChar.combat,
       class: genChar.class,
-      specialization: genChar.specialization
+      specialization: genChar.specialization,
+      roster: -1
     };
     return new char(template);
   }
@@ -340,6 +341,7 @@ class char {
     this.combat_type = data.combat_type;
     this.class = data.class;
     this.specialization = data.specialization;
+    this.roster = data.roster;
 
     //Fields which are ont stored in the DB should be pulled from the Catalog
     let catalogChar = chars[this.unit_name];
@@ -353,10 +355,17 @@ class char {
   }
 
   getCloverValue(){
-    let basexp = Math.floor(this.lvl? this.lvl:0) * 15
+    let basexp = Math.floor(this.lvl? this.lvl:0) * 12
     let rankModifier = (Math.pow(this.rank? this.rank:0, 2)/10) + 1;
   
-    return Math.floor(basexp * rankModifier);
+    return Math.floor(basexp * rankModifier) + 50;
+  }
+  getPointValue(){
+
+    console.log("Groups:"+ pullgroups);
+    let max = Math.max(...pullgroups);
+    let pointValue = this.rank * (max - this.pull_group + 1);
+    return pointValue;
   }
 }
 

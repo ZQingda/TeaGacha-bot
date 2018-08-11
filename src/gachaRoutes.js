@@ -1,4 +1,6 @@
 const Discord = require("discord.js");
+const Roster = require("./gachaRoutesRoster");
+const Admin = require("./gachaRoutesAdmin");
 var colours = require('./config').colours;
 var cur = require("./currency/currency");
 var databcurr = require("./db/currency");
@@ -10,18 +12,28 @@ var char = require("./unit/template").char;
 var inv = require("./unit/unitinventory");
 var user = require("./user/user");
 var modU = require("./unit/unitexpupgrade");
-var roster = require("./unit/unitroster");
 var iconscurr = require("./icons/currencyIcons");
 var iconsunit = require("./icons/unitIcons");
 var unitFilters = require("./filters/unitFilters");
 var conv = require("./currency/weeklyconversions");
 
+/**
+ * Routing all messages which start with "gacha "
+ * @param {*} message 
+ */
 module.exports = function (message) {
-  msg = message.content.split(' ');
-  //console.log(msg);
-  switch (msg[1]) {
-    case "resetcurrencyexchange":
-      resetCurrencyExchange(message);
+  var args = getArgs(message, 1);
+  switch (args[0]) {
+    case "admin":
+      Admin(message, args.slice(1));
+      break;
+    case "roster":
+      Roster(message, args.slice(1));
+      break;
+    case "listroster":
+    case "lr":
+      args.splice(1,0, "list"); //Insert the proper roster command - Call Roster as normal.
+      Roster(message, args.slice(1));
       break;
     case "register":
       register(message);
@@ -80,10 +92,6 @@ module.exports = function (message) {
     case "fu":
       sacUnit(message);
       break;
-    case "listroster":
-    case "lr":
-      showRoster(message);
-      break;
     case "upgradeunit":
     case "uu":
       upgrUnit(message);
@@ -92,7 +100,7 @@ module.exports = function (message) {
       showRankLegend(message);
       break;
     default:
-      console.log(msg);
+      console.log("Gacha Args: "+ args);
       embeds.printSingle(message, Number(config.colours.error), "That's not a gacha command!");
   }
 }
@@ -101,24 +109,10 @@ module.exports = function (message) {
  * Ex: message "gacha showunit 1" will return [1]
  * @param {*} message 
  */
-function getArgs(message){
+function getArgs(message, startIndex=2){
   let args = message.content.split(/\s+/);
-  args = args.slice(2);
+  args = args.slice(startIndex);
   return args;
-}
-function resetCurrencyExchange(message){
-  if(config.admins[message.author.id]){
-    return conv.resetWeeklyConversion()
-    .then(function(){
-      embeds.printSingleNormal(message, "All user's currency exchanges have been reset.");
-    })
-    .catch((err) => {
-      embeds.printSingleError(message, err);
-      console.error('Error : ' + err + " - " + err.stack);
-    })
-  }else{
-    embeds.printSingleError(message, "You don't have access to this command.");
-  }
 }
 
 /**
@@ -150,15 +144,6 @@ function register(message){
   .catch((err) => {
     embeds.printSingleError(message, err);
     console.error( err.stack);
-  });
-}
-
-function showRoster(message) {
-  user.getUser(message.author.id)
-  .then(function(){return roster.listRoster(message)})
-  .catch((err) => {
-    embeds.printSingleError(message, err);
-    console.log("listRoster err " + err.stack);
   });
 }
 

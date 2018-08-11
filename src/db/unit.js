@@ -19,7 +19,7 @@ function insertUnit(unit) {
       unit.combat_type,
       unit.class,
       unit.specialization,
-      -1
+      unit.roster
     ];
     db.run(sqlInsertUnit, parms, function(err){
       if (err) {reject (err);}
