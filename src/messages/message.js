@@ -139,7 +139,7 @@ module.exports.printRoster = async function (message, colour, title, units) {
       if (units[j].roster == (i + 1)) {
         found = true;
         var curUnit = units[j];
-        var details = icons.getRankIcon(curUnit.rank) + "\n**Lv " + curUnit.lvl + "** " + curUnit.class
+        var details = icons.getRankIcon(curUnit.rank) + "("+curUnit.getPointValue()+ "UP)\n**Lv " + curUnit.lvl + "** " + curUnit.class
           + "\n" + icons.getCombatIcon(curUnit.combat_type) + "     " + icons.getArmorIcon(curUnit.armor_class);
 
         msgEmbed.addField((i + 1) + ". " + curUnit.unit_name + " [" + curUnit.inv_index + "]", details + "\n---------------------------", true);
