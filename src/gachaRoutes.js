@@ -72,8 +72,8 @@ module.exports = function (message) {
     case "gg":
       cur.getCurrency(message, 'gems');
       break;
-    case "buyclovers":
-    case "bc":
+    case "buygems":
+    case "bg":
       buyCurrency(message, 'flowers', 'gems', 5);
       break;
     case "sellunit":
