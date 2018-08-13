@@ -230,34 +230,45 @@ module.exports.printUnitPage = async function (message, colour, units, p1, p2, n
 }
 
 module.exports.confirmationMessageYN = async function (message, text) {
-  const yes = "✅";
-  const no = "❎";
-  //var msgEmbed = new Discord.RichEmbed();
-  //message.channel.send("Are you sure?\n:white_check_mark: for yes, :negative_squared_cross_mark: for no");
-  var response = await module.exports.printSingleConfirmation(message, text + "\n\n:white_check_mark: for yes, :negative_squared_cross_mark: for no");
+  try {
+    const yes = "✅";
+    const no = "❎";
 
-  var filterReact = (reaction, user) => { return ((reaction.emoji.name === '✅' || reaction.emoji.name === '❎') && user.id === message.author.id) };
+    var response = await module.exports.printSingleConfirmation(message, text + "\n\n:white_check_mark: for yes, :negative_squared_cross_mark: for no");
 
-  await response.react(yes);
-  await response.react(no);
+    var filterReact = (reaction, user) => { return ((reaction.emoji.name === '✅' || reaction.emoji.name === '❎') && user.id === message.author.id) };
 
-  const reactions = await response.awaitReactions(filterReact, { max: 1, time: 7000 });
-  response.delete();
+    await response.react(yes);
+    await response.react(no);
 
-  if (reactions.has(yes) && reactions.get(yes).count >= 1) {
-    return true;
-  } else if (reactions.has(no) && reactions.get(no).count >= 1) {
-    return false;
-  } else {
-    var errResponse = await module.exports.printSingleError(message, "No response was received. Cancelling action.");
-    errResponse.delete(5000);
+    const reactions = await response.awaitReactions(filterReact, { max: 1, time: 7000 });
+    response.delete();
+
+    if (reactions.has(yes) && reactions.get(yes).count >= 1) {
+      return true;
+    } else if (reactions.has(no) && reactions.get(no).count >= 1) {
+      return false;
+    } else {
+      var errResponse = await module.exports.printSingleError(message, "No response was received. Cancelling action.");
+      errResponse.delete(5000);
+    }
+  }
+  catch (error) {
+    console.log(error.message)
+    module.exports.printSingleError(message, "Error when handling confirmation response");
   }
 }
 
 module.exports.printUnitRanks = function (message) {
-  var legend = "";
-  for (var i = templ.getRankCount(); i > 0; i--) {
-    legend += icons.getRankIcon(i) + "\n";
+  try {
+    var legend = "";
+    for (var i = templ.getRankCount(); i > 0; i--) {
+      legend += icons.getRankIcon(i) + "\n";
+    }
+    module.exports.printSingle(message, parseInt(config.colours.normal), legend);
   }
-  module.exports.printSingle(message, parseInt(config.colours.normal), legend);
+  catch (error) {
+    console.log(error.message)
+    module.exports.printSingleError(message, "Error when trying to print rank icons");
+  }
 }
